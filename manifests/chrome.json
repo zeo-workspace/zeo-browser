@@ -1,0 +1,7 @@
+{
+  "minimum_chrome_version": "116",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkd96BwLYKoZWS//YyHMtqfy9HS+ByoDNDuRUUS3TelirXPt1mT+vvqxdYSmmQ8g5srzNDwVAXs+EwQC1e9XNw7qSnBhDn93xduKvbWtlOIHd+zxByGOfSLjvyp4kSWiG01XMeYuZ9SvkKOG9IveHsiCZgUeAxgoielsO/ZdE3N5tcimwIxpFDBXCdOKxaj7oqam3TS5DV4XjRB5T/dMaEVpO5AG9lSTqv0tvqW7cJ4fj9MiYdglS0ol1WCNNLv+mBrQldhmkAw996vEM7nzqMDUBveUmHjlwA4TjvJWUFCLCpv3QaRIfVO9E7K7c3zk0DD/mz6Wuc11kSqWZ+BAKRwIDAQAB",
+  "background": { "service_worker": "background.js", "type": "module" },
+  "side_panel": { "default_path": "sidebar/index.html" },
+  "permissions": ["nativeMessaging", "sidePanel", "activeTab", "scripting", "storage", "debugger"]
+}

@@ -1,0 +1,12 @@
+{
+  "browser_specific_settings": {
+    "gecko": { "id": "zeo-browser@zeo.dev", "strict_min_version": "128.0" }
+  },
+  "background": { "scripts": ["background.js"] },
+  "sidebar_action": {
+    "default_panel": "sidebar/index.html",
+    "default_title": "Zeo",
+    "open_at_install": false
+  },
+  "permissions": ["nativeMessaging", "activeTab", "scripting", "storage"]
+}
