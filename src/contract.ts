@@ -30,6 +30,11 @@ import {
   PROTOCOL_VERSION,
 } from "./limits.js";
 
+// No generated code: zod's JIT builds validators with `Function`, which the extension pages' CSP
+// (MV3 forbids 'unsafe-eval') refuses — and even the probe is reported as a CSP violation. Set
+// once here, where every bundle first loads zod.
+z.config({ jitless: true });
+
 // ---------------------------------------------------------------------------------------------
 // Errors and results
 
