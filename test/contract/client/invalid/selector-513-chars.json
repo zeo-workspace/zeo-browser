@@ -1,0 +1,34 @@
+{
+  "$expect": "bad_request",
+  "v": 2,
+  "kind": "send",
+  "id": "r5",
+  "text": "An element whose selector is 513 characters.",
+  "attachments": [
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "html": "<li class=\"todo-item\">Item 1</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 1",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 40,
+          "w": 320,
+          "h": 32
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "v": 2,
+  "kind": "snapshot",
+  "id": "r2",
+  "thread": {
+    "thread_id": "5f0c2a9e-7b1d-4c3a-9e4f-2d8b6a1c0e7f",
+    "title": "Fix the header overflow",
+    "project": "acme-web",
+    "agent": "Claude Agent (Plus)",
+    "status": "awaiting_permission",
+    "followed": true
+  },
+  "earlier": 12,
+  "entries": [
+    { "role": "user", "markdown": "Why does the header overflow at 320 px?", "truncated": false },
+    {
+      "role": "assistant",
+      "markdown": "The `nav` has a fixed `min-width: 400px`. I will change it.",
+      "truncated": false
+    },
+    {
+      "role": "tool",
+      "markdown": "```diff\n- min-width: 400px;\n+ min-width: 0;\n```",
+      "truncated": false,
+      "tool": { "title": "Edit src/Header.css", "status": "awaiting_permission" }
+    },
+    { "role": "compaction", "markdown": "Earlier messages were summarised.", "truncated": false },
+    { "role": "question", "markdown": "Should the logo shrink too?", "truncated": false }
+  ],
+  "status": { "state": "awaiting_permission", "message": null },
+  "permissions": [
+    {
+      "request_id": "perm-3",
+      "entry_index": 2,
+      "title": "Edit src/Header.css",
+      "options": [
+        { "option_id": "allow_once", "label": "Allow", "kind": "allow_once" },
+        { "option_id": "allow_always", "label": "Always allow", "kind": "allow_always" },
+        { "option_id": "reject_once", "label": "Reject", "kind": "reject_once" },
+        { "option_id": "reject_always", "label": "Always reject", "kind": "reject_always" }
+      ]
+    }
+  ]
+}

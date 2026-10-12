@@ -1,0 +1,6 @@
+{
+  "v": 1,
+  "ok": false,
+  "error": "unsupported_version",
+  "message": "Unsupported protocol version; Zeo speaks version 1"
+}

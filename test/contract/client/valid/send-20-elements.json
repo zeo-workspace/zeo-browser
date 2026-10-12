@@ -1,0 +1,508 @@
+{
+  "v": 2,
+  "kind": "send",
+  "id": "r5",
+  "text": "These twenty rows should align; they do not.",
+  "attachments": [
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(1)",
+      "html": "<li class=\"todo-item\">Item 1</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 1",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 40,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(2)",
+      "html": "<li class=\"todo-item\">Item 2</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 2",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 76,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(3)",
+      "html": "<li class=\"todo-item\">Item 3</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 3",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 112,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(4)",
+      "html": "<li class=\"todo-item\">Item 4</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 4",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 148,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(5)",
+      "html": "<li class=\"todo-item\">Item 5</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 5",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 184,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(6)",
+      "html": "<li class=\"todo-item\">Item 6</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 6",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 220,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(7)",
+      "html": "<li class=\"todo-item\">Item 7</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 7",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 256,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(8)",
+      "html": "<li class=\"todo-item\">Item 8</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 8",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 292,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(9)",
+      "html": "<li class=\"todo-item\">Item 9</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 9",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 328,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(10)",
+      "html": "<li class=\"todo-item\">Item 10</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 10",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 364,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(11)",
+      "html": "<li class=\"todo-item\">Item 11</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 11",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 400,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(12)",
+      "html": "<li class=\"todo-item\">Item 12</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 12",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 436,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(13)",
+      "html": "<li class=\"todo-item\">Item 13</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 13",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 472,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(14)",
+      "html": "<li class=\"todo-item\">Item 14</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 14",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 508,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(15)",
+      "html": "<li class=\"todo-item\">Item 15</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 15",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 544,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(16)",
+      "html": "<li class=\"todo-item\">Item 16</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 16",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 580,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(17)",
+      "html": "<li class=\"todo-item\">Item 17</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 17",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 616,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(18)",
+      "html": "<li class=\"todo-item\">Item 18</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 18",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 652,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(19)",
+      "html": "<li class=\"todo-item\">Item 19</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 19",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 688,
+          "w": 320,
+          "h": 32
+        }
+      }
+    },
+    {
+      "type": "element",
+      "page_url": "http://localhost:5173/todos",
+      "selector": "#todos > li:nth-child(20)",
+      "html": "<li class=\"todo-item\">Item 20</li>",
+      "dom": {
+        "tag": "li",
+        "id": null,
+        "classes": ["todo-item"],
+        "text": "Item 20",
+        "attrs": {
+          "role": "listitem"
+        },
+        "styles": {
+          "display": "flex",
+          "padding": "4px 8px"
+        },
+        "rect": {
+          "x": 16,
+          "y": 724,
+          "w": 320,
+          "h": 32
+        }
+      }
+    }
+  ]
+}

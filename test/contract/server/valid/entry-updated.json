@@ -1,0 +1,11 @@
+{
+  "v": 2,
+  "kind": "entry_updated",
+  "index": 2,
+  "entry": {
+    "role": "tool",
+    "markdown": "```diff\n- min-width: 400px;\n+ min-width: 0;\n```",
+    "truncated": false,
+    "tool": { "title": "Edit src/Header.css", "status": "completed" }
+  }
+}

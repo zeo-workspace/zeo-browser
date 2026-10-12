@@ -1,0 +1,10 @@
+{
+  "$expect": "unsupported_version",
+  "v": 1,
+  "kind": "hello",
+  "client": {
+    "browser": "chrome",
+    "extension_id": "dhbddmompicnipfolmglmbnlpgglojid",
+    "extension_version": "0.1.0"
+  }
+}

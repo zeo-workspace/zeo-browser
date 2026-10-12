@@ -1,0 +1,10 @@
+{
+  "v": 2,
+  "kind": "hello",
+  "id": "h1",
+  "client": {
+    "browser": "chrome",
+    "extension_id": "dhbddmompicnipfolmglmbnlpgglojid",
+    "extension_version": "0.1.0"
+  }
+}

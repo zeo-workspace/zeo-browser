@@ -1,0 +1,50 @@
+{
+  "v": 2,
+  "kind": "send",
+  "id": "r7",
+  "text": "The list stays empty after login; here is what the page logged and fetched.",
+  "attachments": [
+    {
+      "type": "console",
+      "page_url": "http://localhost:5173/dashboard",
+      "cut_short": false,
+      "entries": [
+        {
+          "level": "error",
+          "text": "TypeError: Cannot read properties of undefined (reading 'items')",
+          "source": "http://localhost:5173/src/List.tsx:41:17",
+          "ts": 1760227200123
+        },
+        {
+          "level": "warn",
+          "text": "React Router: v7 future flag not set",
+          "source": null,
+          "ts": 1760227200456
+        }
+      ]
+    },
+    {
+      "type": "network",
+      "page_url": "http://localhost:5173/dashboard",
+      "cut_short": false,
+      "entries": [
+        {
+          "method": "GET",
+          "url": "http://localhost:5173/api/items?page=1",
+          "status": 500,
+          "resource_type": "fetch",
+          "ms": 87,
+          "failed": null
+        },
+        {
+          "method": "POST",
+          "url": "http://localhost:5173/api/telemetry",
+          "status": null,
+          "resource_type": "xmlhttprequest",
+          "ms": null,
+          "failed": "net::ERR_BLOCKED_BY_CLIENT"
+        }
+      ]
+    }
+  ]
+}

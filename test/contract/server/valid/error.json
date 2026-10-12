@@ -1,0 +1,8 @@
+{
+  "v": 2,
+  "kind": "error",
+  "id": "r4",
+  "error": "no_thread",
+  "message": "No Zeo thread is open to receive this message",
+  "fatal": false
+}

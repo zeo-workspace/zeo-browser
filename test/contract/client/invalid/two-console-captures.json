@@ -1,0 +1,21 @@
+{
+  "$expect": "bad_request",
+  "v": 2,
+  "kind": "send",
+  "id": "r1",
+  "text": "Two console captures in one message.",
+  "attachments": [
+    {
+      "type": "console",
+      "page_url": "http://localhost:5173/",
+      "cut_short": false,
+      "entries": [{ "level": "log", "text": "ready", "source": null, "ts": 1760227200000 }]
+    },
+    {
+      "type": "console",
+      "page_url": "http://localhost:5173/",
+      "cut_short": false,
+      "entries": [{ "level": "log", "text": "ready", "source": null, "ts": 1760227200000 }]
+    }
+  ]
+}

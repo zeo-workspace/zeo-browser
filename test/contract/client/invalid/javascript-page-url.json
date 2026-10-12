@@ -1,0 +1,24 @@
+{
+  "$expect": "bad_request",
+  "v": 2,
+  "kind": "send",
+  "id": "r1",
+  "text": "An element from a javascript: URL.",
+  "attachments": [
+    {
+      "type": "element",
+      "page_url": "javascript:alert(1)",
+      "selector": "#save",
+      "html": "<button id=\"save\">Save</button>",
+      "dom": {
+        "tag": "button",
+        "id": "save",
+        "classes": [],
+        "text": "Save",
+        "attrs": { "type": "button" },
+        "styles": {},
+        "rect": { "x": 0, "y": 0, "w": 80, "h": 32 }
+      }
+    }
+  ]
+}

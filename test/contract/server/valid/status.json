@@ -1,0 +1,5 @@
+{
+  "v": 2,
+  "kind": "status",
+  "status": { "state": "error", "message": "The agent stopped: rate limited" }
+}

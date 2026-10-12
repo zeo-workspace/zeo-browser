@@ -1,0 +1,16 @@
+{
+  "$expect": "bad_request",
+  "v": 2,
+  "kind": "send",
+  "id": "r5",
+  "text": "A 1569 px wide strip, one past the long-edge cap.",
+  "attachments": [
+    {
+      "type": "image",
+      "mime": "image/png",
+      "data_b64": "iVBORw0KGgoAAAANSUhEUgAABiEAAAABCAIAAAA3n5pNAAAAG0lEQVR4nO3BMQEAAADCoPVPbQhfoAAAAADgMxJkAAEp0tcvAAAAAElFTkSuQmCC",
+      "w": 1569,
+      "h": 1
+    }
+  ]
+}

@@ -1,0 +1,519 @@
+{
+  "$expect": "bad_request",
+  "v": 2,
+  "kind": "snapshot",
+  "thread": null,
+  "earlier": 0,
+  "entries": [
+    {
+      "role": "user",
+      "markdown": "Message 1",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 2",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 3",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 4",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 5",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 6",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 7",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 8",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 9",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 10",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 11",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 12",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 13",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 14",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 15",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 16",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 17",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 18",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 19",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 20",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 21",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 22",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 23",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 24",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 25",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 26",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 27",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 28",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 29",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 30",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 31",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 32",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 33",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 34",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 35",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 36",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 37",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 38",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 39",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 40",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 41",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 42",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 43",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 44",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 45",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 46",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 47",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 48",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 49",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 50",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 51",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 52",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 53",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 54",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 55",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 56",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 57",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 58",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 59",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 60",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 61",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 62",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 63",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 64",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 65",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 66",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 67",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 68",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 69",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 70",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 71",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 72",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 73",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 74",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 75",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 76",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 77",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 78",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 79",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 80",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 81",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 82",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 83",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 84",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 85",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 86",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 87",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 88",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 89",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 90",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 91",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 92",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 93",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 94",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 95",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 96",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 97",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 98",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 99",
+      "truncated": false
+    },
+    {
+      "role": "assistant",
+      "markdown": "Message 100",
+      "truncated": false
+    },
+    {
+      "role": "user",
+      "markdown": "Message 101",
+      "truncated": false
+    }
+  ],
+  "status": {
+    "state": "idle",
+    "message": null
+  },
+  "permissions": []
+}

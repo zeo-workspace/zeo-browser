@@ -1,0 +1,13 @@
+{
+  "v": 2,
+  "kind": "permission_requested",
+  "permission": {
+    "request_id": "perm-4",
+    "entry_index": 6,
+    "title": "Run npm test",
+    "options": [
+      { "option_id": "allow_once", "label": "Allow", "kind": "allow_once" },
+      { "option_id": "reject_once", "label": "Reject", "kind": "reject_once" }
+    ]
+  }
+}

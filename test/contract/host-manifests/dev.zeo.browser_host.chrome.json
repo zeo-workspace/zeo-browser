@@ -1,0 +1,7 @@
+{
+  "name": "dev.zeo.browser_host",
+  "description": "Zeo browser extension host: relays the sidebar to Zeo's devtools bridge",
+  "path": "/usr/libexec/zeo-browser-host",
+  "type": "stdio",
+  "allowed_origins": ["chrome-extension://dhbddmompicnipfolmglmbnlpgglojid/"]
+}
