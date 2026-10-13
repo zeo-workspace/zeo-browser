@@ -14,7 +14,7 @@
     "lint": "eslint src test e2e scripts",
     "format:check": "prettier --check src test e2e scripts",
     "typecheck": "tsc --noEmit",
-    "e2e": "playwright test"
+    "e2e": "xvfb-run -a -s \"-screen 0 1600x1000x24\" playwright test"
   },
   "dependencies": {
     "markdown-it": "^15.0.2",

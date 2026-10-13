@@ -38,6 +38,7 @@ function fakePage(
         query: vi.fn(async () => [{ ...tab }]),
         onActivated: event("onActivated"),
         onUpdated: event("onUpdated"),
+        onRemoved: event("onRemoved"),
       },
       windows: {
         getCurrent: vi.fn(async () => ({
@@ -316,6 +317,61 @@ describe("shortcut boot status from the background (R9.1, R9.9)", () => {
     page.listeners.onUpdated!.forEach((f) => f(7));
     await flush();
     expect(v.text()).not.toContain(PROTECTED);
+  });
+
+  it("hostile: a protected outcome on a tab whose URL is hidden (about:blank) disables the tools until it navigates", async () => {
+    // Task 8.3's E2E: under the shortcut's activeTab, about:blank's URL stays hidden.
+    const page = fakePage({});
+    const v = await mountWithPort(page);
+    await v.push({ type: "start-picker", tabId: 7 });
+    await v.push({ type: "picker-status", tabId: 7, status: "protected" });
+    expect(v.text()).toContain(PROTECTED);
+    expect(v.button(/pick element/i).disabled).toBe(true);
+    expect(v.button(/screenshot/i).disabled).toBe(true);
+    expect(page.deps.permissions.request).not.toHaveBeenCalled();
+    // A re-read with the URL still hidden keeps it; a navigation (status "loading") ends it.
+    page.listeners.onFocusChanged!.forEach((f) => f());
+    await flush();
+    expect(v.button(/pick element/i).disabled).toBe(true);
+    page.listeners.onUpdated!.forEach((f) => f(7, { status: "loading" }));
+    await flush();
+    expect(v.text()).not.toContain(PROTECTED);
+    expect(v.button(/pick element/i).disabled).toBe(false);
+  });
+
+  it("hostile: a hidden-URL protected tab that navigates while another tab is current does not stay disabled", async () => {
+    // A flagged at about:blank, B becomes current, A navigates to a readable site, back to A.
+    const page = fakePage({});
+    const v = await mountWithPort(page);
+    await v.push({ type: "picker-status", tabId: 7, status: "protected" });
+    expect(v.button(/pick element/i).disabled).toBe(true);
+    page.tab.id = 8;
+    page.listeners.onActivated!.forEach((f) => f());
+    await flush();
+    expect(v.button(/pick element/i).disabled).toBe(false);
+    page.listeners.onUpdated!.forEach((f) => f(7, { status: "loading" }));
+    await flush();
+    page.tab.id = 7;
+    page.listeners.onActivated!.forEach((f) => f());
+    await flush();
+    expect(v.text()).not.toContain(PROTECTED);
+    expect(v.button(/pick element/i).disabled).toBe(false);
+  });
+
+  it("a closed tab's hidden-URL protected state is dropped", async () => {
+    const page = fakePage({});
+    const v = await mountWithPort(page);
+    await v.push({ type: "picker-status", tabId: 7, status: "protected" });
+    expect(v.button(/pick element/i).disabled).toBe(true);
+    page.tab.id = 8;
+    page.listeners.onActivated!.forEach((f) => f());
+    await flush();
+    page.listeners.onRemoved!.forEach((f) => f(7));
+    // Tab ids are not reused; reading id 7 again only shows the entry is gone.
+    page.tab.id = 7;
+    page.listeners.onActivated!.forEach((f) => f());
+    await flush();
+    expect(v.button(/pick element/i).disabled).toBe(false);
   });
 
   it("a failed outcome shows the failure sentence", async () => {

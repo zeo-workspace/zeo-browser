@@ -13,7 +13,8 @@
   --panel: #ffffff;
   --ink: #1d1c21;
   --ink-2: #57545f;
-  --ink-3: #8a8792;
+  /* Tertiary text: >= 4.5:1 on every surface token (WCAG AA, axe color-contrast). */
+  --ink-3: #6b6874;
   --rule: #e3e1dc;
   --rule-strong: #cfccc5;
   --accent: #6b4fd8;
@@ -36,7 +37,7 @@
     --panel: #1c1b20;
     --ink: #e9e7ee;
     --ink-2: #aeaab8;
-    --ink-3: #7c7886;
+    --ink-3: #94909e;
     --rule: #2c2a32;
     --rule-strong: #3b3842;
     --accent: #a08cff;

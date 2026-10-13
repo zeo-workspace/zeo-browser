@@ -10,7 +10,9 @@
 //   are disabled and the protected sentence is shown (`Composer.setPageProtected`). An injection
 //   refused with "Cannot access", or one where picker.js reports a PDF viewer (whose URL is the
 //   PDF's own), turns the same state on for that tab until its URL changes — whether the Pick
-//   button injected it or the shortcut did (the background's `picker-status`, `showBoot`).
+//   button injected it or the shortcut did (the background's `picker-status`, `showBoot`). When
+//   the URL stays hidden even under the shortcut's grant (about:blank), the state is keyed on the
+//   tab alone and ends at its next navigation (`tabs.onUpdated` with status "loading").
 // - Pick: the handler calls `startPick` on the tab as last read, without awaiting anything first,
 //   so its `permissions.request` stays inside the click (Firefox's user-input rule). A refusal
 //   picks nothing.
@@ -38,7 +40,9 @@ export interface PageDeps extends PickApi {
   tabs: {
     query(q: { active: true; windowId: number }): Promise<Array<{ id?: number; url?: string }>>;
     onActivated: BrowserEvent<() => void>;
-    onUpdated: BrowserEvent<(tabId: number) => void>;
+    onUpdated: BrowserEvent<(tabId: number, change?: { status?: string }) => void>;
+    /** Optional so test doubles without it still fit; the browser always has it. */
+    onRemoved?: BrowserEvent<(tabId: number) => void>;
   };
   windows: {
     getCurrent(): Promise<{ id?: number; type?: string }>;
@@ -83,13 +87,18 @@ export function mountPickTool(
   let tab: PageTab | null = null;
   let seq = 0;
   const listeners: Array<(tab: PageTab | null) => void> = [];
-  /** Tabs found protected only by trying (a PDF viewer), keyed by id, with the URL they had. */
-  const foundProtected = new Map<number, string>();
+  /**
+   * Tabs found protected only by trying (a PDF viewer, or a shortcut refused on a page), keyed by
+   * id, with the URL they had — undefined when the browser kept it hidden.
+   */
+  const foundProtected = new Map<number, string | undefined>();
   /** A shortcut boot outcome waiting for the next page-tab read (`showBoot`). */
   let boot: { tabId: number; status: PickerBootStatus } | null = null;
 
   const isProtected = (t: PageTab | null): boolean =>
-    t?.url !== undefined && (isProtectedUrl(t.url) || foundProtected.get(t.id) === t.url);
+    t !== null &&
+    ((t.url !== undefined && isProtectedUrl(t.url)) ||
+      (foundProtected.has(t.id) && foundProtected.get(t.id) === t.url));
 
   const onPick = (): void => {
     const target = tab;
@@ -122,9 +131,13 @@ export function mountPickTool(
 
   const apply = (next: PageTab | null): void => {
     tab = next;
-    // A tab found protected stays so until it shows another URL.
-    const known = next === null ? undefined : foundProtected.get(next.id);
-    if (next !== null && next.url !== undefined && known !== undefined && known !== next.url) {
+    // A tab found protected stays so until it shows another URL (a hidden one ends on navigation).
+    if (
+      next !== null &&
+      next.url !== undefined &&
+      foundProtected.has(next.id) &&
+      foundProtected.get(next.id) !== next.url
+    ) {
       foundProtected.delete(next.id);
     }
     const shown = boot;
@@ -132,11 +145,9 @@ export function mountPickTool(
     if (shown !== null && next !== null && next.id === shown.tabId) {
       if (shown.status === "failed") {
         composer.notify(TEXT.pickFailed, "error");
-      } else if (next.url !== undefined) {
-        foundProtected.set(next.id, next.url);
       } else {
-        // No URL to key the protected state on: say it once instead.
-        composer.notify(TEXT.protectedPage, "error");
+        // Keyed on the URL when it is readable, else on the tab until it navigates (R9.9).
+        foundProtected.set(next.id, next.url);
       }
     }
     composer.setPageProtected(isProtected(next));
@@ -180,14 +191,30 @@ export function mountPickTool(
   };
 
   const onActivated = () => refresh();
-  const onUpdated = (tabId: number) => {
+  const onUpdated = (tabId: number, change?: { status?: string }) => {
+    // A navigation of ANY tab ends a protected state whose URL was never readable: its URL may
+    // have changed, also while another tab is current. Known limit: a "loading" that lands
+    // between `showBoot` and the read that applies it is missed, so that tab stays protected
+    // until its next navigation or the next shortcut.
+    if (
+      change?.status === "loading" &&
+      foundProtected.has(tabId) &&
+      foundProtected.get(tabId) === undefined
+    ) {
+      foundProtected.delete(tabId);
+    }
     if (tabId === tab?.id) {
       refresh();
     }
   };
+  // A closed tab's entry would otherwise stay for the sidebar's lifetime.
+  const onRemoved = (tabId: number) => {
+    foundProtected.delete(tabId);
+  };
   const onFocusChanged = () => refresh();
   page.tabs.onActivated.addListener(onActivated);
   page.tabs.onUpdated.addListener(onUpdated);
+  page.tabs.onRemoved?.addListener(onRemoved);
   page.windows.onFocusChanged.addListener(onFocusChanged);
   refresh();
 
@@ -204,6 +231,7 @@ export function mountPickTool(
     close: () => {
       page.tabs.onActivated.removeListener(onActivated);
       page.tabs.onUpdated.removeListener(onUpdated);
+      page.tabs.onRemoved?.removeListener(onRemoved);
       page.windows.onFocusChanged.removeListener(onFocusChanged);
     },
   };

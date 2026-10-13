@@ -1,0 +1,35 @@
+<!doctype html>
+<!-- Story 045 E2E fixture: a page that is not Zeo's, with a duplicated id, twins, a form and a
+     click handler the picker must swallow. It logs to the console and fetches for the recorder.
+     The twins carry editor text and a link with a query value: neither may leave in outer HTML. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture page</title>
+    <style>
+      body {
+        font: 16px sans-serif;
+      }
+      .card {
+        padding: 12px;
+        margin: 8px;
+        border: 1px solid #888;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="title">Fixture</h1>
+    <div class="card" id="dup">first card <span contenteditable="true">EDITOR-SECRET</span></div>
+    <div class="card" id="dup">second card <a href="/next?q=QUERY-SECRET#frag">next</a></div>
+    <form><input id="secret" name="secret" value="FORM-SECRET" /></form>
+    <button id="clicker" type="button">Click me</button>
+    <script>
+      window.pageClicks = 0;
+      document.getElementById("clicker").addEventListener("click", () => window.pageClicks++);
+      window.makeNoise = () => {
+        console.error("fixture error " + Date.now());
+        fetch("/data.json?token=SECRET-TOKEN").catch(() => {});
+      };
+    </script>
+  </body>
+</html>
