@@ -429,3 +429,26 @@ describe("large images do not overflow the base64 check (R10.3)", () => {
     }
   });
 });
+
+// Added by the orchestrator after the 5.2 tech review: the Rust side refuses these, so zod does too.
+describe("agreement with the Rust bridge (5.2 review)", () => {
+  it("hostile: padded base64 with non-zero trailing bits is refused", () => {
+    const bad = PNG_2X1.replace(/(.)(=+)$/, (_m: string, c: string, p: string) => {
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+      return alphabet[(alphabet.indexOf(c) + 1) % 64] + p;
+    });
+    expect(bad).not.toBe(PNG_2X1);
+    const msg = { v: 2, kind: "send", id: "r", text: "t", attachments: [image(bad)] };
+    expect(verdict(parseClient(msg))).toBe("bad_request");
+    const ok = { v: 2, kind: "send", id: "r", text: "t", attachments: [image()] };
+    expect(verdict(parseClient(ok))).toBe("accepted");
+  });
+  it("a network status outside 100..599 is refused", () => {
+    for (const status of [99, 600, 9007199254740991]) {
+      const cap = networkCap(1);
+      (cap.entries[0] as Record<string, unknown>).status = status;
+      const msg = { v: 2, kind: "send", id: "r", text: "t", attachments: [cap] };
+      expect(verdict(parseClient(msg)), String(status)).toBe("bad_request");
+    }
+  });
+});

@@ -132,14 +132,27 @@ type ImageHeader = { mime: ImageMime; w: number; h: number };
 /** The base64 alphabet followed by at most two `=`: one character class, so no backtracking. */
 const BASE64_CHARS = /^[A-Za-z0-9+/]*={0,2}$/;
 
+const B64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
 /**
  * Canonical, padded standard base64 — what Rust's `base64::STANDARD` engine accepts: alphabet
- * characters, then at most two `=`, the whole a multiple of 4 long. That is the same set as the
- * grouped pattern `^(?:[A-Za-z0-9+/]{4})*(?:..==|...=)?$`, which was replaced because its
+ * characters, then at most two `=`, the whole a multiple of 4 long, and the unused bits of the
+ * last character before the padding all zero (`btoa` always writes them so). The length and
+ * character checks replace the grouped pattern `^(?:[A-Za-z0-9+/]{4})*(?:..==|...=)?$`, whose
  * per-group backtracking overflows the stack on a multi-megabyte image (V8 from about 4.47 M
  * chars, below the 4 MiB limit; Firefox reports "too much recursion").
  */
-const isCanonicalBase64 = (s: string): boolean => s.length % 4 === 0 && BASE64_CHARS.test(s);
+const isCanonicalBase64 = (s: string): boolean => {
+  if (s.length % 4 !== 0 || !BASE64_CHARS.test(s)) {
+    return false;
+  }
+  const pad = s.endsWith("==") ? 2 : s.endsWith("=") ? 1 : 0;
+  if (pad === 0) {
+    return true;
+  }
+  const last = B64_ALPHABET.indexOf(s.charAt(s.length - pad - 1));
+  return last >= 0 && last % (pad === 2 ? 16 : 4) === 0;
+};
 
 /** Decoded length of canonical base64, computed without decoding it. */
 const decodedLength = (b64: string): number =>
@@ -290,7 +303,7 @@ const networkAttachment = z.strictObject({
       z.strictObject({
         method: text(),
         url: maxBytes(MAX_NETWORK_URL_BYTES),
-        status: z.int().nullable(),
+        status: z.int().min(100).max(599).nullable(),
         resource_type: text(),
         ms: z.number().nullable(),
         failed: text().nullable(),
