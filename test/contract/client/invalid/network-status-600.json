@@ -1,0 +1,32 @@
+{
+  "v": 2,
+  "kind": "send",
+  "id": "r7",
+  "text": "A network entry whose status is not an HTTP status.",
+  "attachments": [
+    {
+      "type": "network",
+      "page_url": "http://localhost:5173/dashboard",
+      "cut_short": false,
+      "entries": [
+        {
+          "method": "GET",
+          "url": "http://localhost:5173/api/items?page=1",
+          "status": 600,
+          "resource_type": "fetch",
+          "ms": 87,
+          "failed": null
+        },
+        {
+          "method": "POST",
+          "url": "http://localhost:5173/api/telemetry",
+          "status": null,
+          "resource_type": "xmlhttprequest",
+          "ms": null,
+          "failed": "net::ERR_BLOCKED_BY_CLIENT"
+        }
+      ]
+    }
+  ],
+  "$expect": "bad_request"
+}
