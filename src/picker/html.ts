@@ -29,7 +29,7 @@ const SRCSET_ATTRS = new Set(["srcset", "imagesrcset"]);
 const encoder = new TextEncoder();
 
 /** Text inside a rich-text editor is user input, like a form value (R9.7, decision N1). */
-function isEditor(el: Element): boolean {
+export function isEditor(el: Element): boolean {
   const editable = el.getAttribute("contenteditable");
   const roles = (el.getAttribute("role") ?? "").toLowerCase().split(/\s+/);
   return (editable !== null && editable.toLowerCase() !== "false") || roles.includes("textbox");

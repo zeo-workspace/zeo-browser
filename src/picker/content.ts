@@ -39,6 +39,7 @@ import { sanitizedOuterHtml } from "./html.js";
 import { createSelection } from "./selection.js";
 import { uniqueSelector } from "./selector.js";
 import { summarize } from "./summary.js";
+import { redactSummary } from "./summary-redact.js";
 
 export type ElementItem = Extract<Attachment, { type: "element" }>;
 export interface PickRect {
@@ -237,7 +238,7 @@ export function describePick(elements: readonly Element[]): PickedMessage | null
       page_url,
       selector,
       html: sanitizedOuterHtml(el),
-      dom: summarize(el, window),
+      dom: redactSummary(el, summarize(el, window)),
     });
     rects.push(rectOf(el));
   }

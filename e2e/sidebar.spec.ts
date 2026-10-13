@@ -608,11 +608,9 @@ test.describe("page tools", () => {
     // URL query values: neither the page's (page_url) nor a link's (outer HTML) leaves.
     expect(JSON.stringify(sent)).not.toContain("URL-SECRET");
     expect(JSON.stringify(sent)).not.toContain("QUERY-SECRET");
-    // Editor text is stripped from the outer HTML (R9.7); the DOM summary of story 033 is
-    // carried as it is (R9.6).
-    for (const el of elements) {
-      expect(el.html).not.toContain("EDITOR-SECRET");
-    }
+    // Editor text leaves neither in the outer HTML (R9.7) nor in the DOM summary (R9.17).
+    expect(JSON.stringify(sent)).not.toContain("EDITOR-SECRET");
+    expect(JSON.stringify(sent)).toContain("first card");
   });
 
   test("hostile: a screenshot with no activeTab says how to grant it and asks nothing (R10.6, R10.8)", async () => {
