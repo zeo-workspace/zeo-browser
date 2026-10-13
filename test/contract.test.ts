@@ -403,3 +403,29 @@ describe("probeServer: the lenient read before the strict parse (design.md §A3)
     expect(client("{not json")).toBe("bad_request");
   });
 });
+
+// Story 045, task 4.3 fix round: the base64 check must not backtrack per 4-char group. The grouped
+// pattern overflowed the stack from about 4.47 M chars in V8 ("too much recursion" in Firefox),
+// below the 4 MiB limit, so a real screenshot made the parse throw.
+describe("large images do not overflow the base64 check (R10.3)", () => {
+  // A real 2×1 PNG grown with an ancillary chunk to about 4.1 MB decoded, 5.47 M chars of base64.
+  const big = png(2, 1, 4_100_000);
+
+  it("hostile: a well-formed image near 5.5 M chars parses without throwing", () => {
+    expect(big.length).toBeGreaterThan(5_400_000);
+    let result: unknown;
+    expect(() => (result = parseClient(send("", [image(big)])))).not.toThrow();
+    expect(verdict(result)).toBe("accepted");
+  });
+
+  it("non-canonical base64 of that size is still refused, without throwing", () => {
+    const unpadded = big.replace(/=+$/, "");
+    const truncated = unpadded === big ? big.slice(0, -1) : unpadded;
+    const badChar = `${big.slice(0, -4)}AAA!`;
+    const innerPad = `${big.slice(0, -8)}AA==AAAA`;
+    for (const data of [truncated, badChar, innerPad]) {
+      expect(() => parseClient(send("", [image(data)]))).not.toThrow();
+      expect(client(send("", [image(data)]))).toBe("bad_request");
+    }
+  });
+});

@@ -29,6 +29,7 @@ import {
   MAX_THREADS,
   PROTOCOL_VERSION,
 } from "./limits.js";
+import { ATTR_ALLOWLIST, DOM_SUMMARY_MAX_BYTES, STYLE_KEYS } from "./contract-constants.js";
 
 // No generated code: zod's JIT builds validators with `Function`, which the extension pages' CSP
 // (MV3 forbids 'unsafe-eval') refuses — and even the probe is reported as a CSP violation. Set
@@ -104,36 +105,8 @@ const maxBytes = (max: number) =>
 // element picked here obeys the same caps 033's validator in Zeo already enforces. Keep the two in
 // step: the attribute allowlist, the style keys and every cap below are 033's, not this story's.
 
-/** Attribute names a DOM summary may carry: `role`, `aria-*`, `href`, `type`, `name`, `alt`. */
-export const ATTR_ALLOWLIST = /^(role|aria-[a-z-]+|href|type|name|alt)$/;
-
-/** The computed styles a DOM summary may carry, in the order the picker reads them. */
-export const STYLE_KEYS = [
-  "display",
-  "position",
-  "box-sizing",
-  "width",
-  "height",
-  "margin",
-  "padding",
-  "border",
-  "border-radius",
-  "color",
-  "background-color",
-  "font-family",
-  "font-size",
-  "font-weight",
-  "line-height",
-  "text-align",
-  "gap",
-  "flex-direction",
-  "justify-content",
-  "align-items",
-  "grid-template-columns",
-  "opacity",
-  "z-index",
-  "overflow",
-] as const;
+// The zod-free constants live in contract-constants.ts so the picker bundle can do without zod.
+export { ATTR_ALLOWLIST, DOM_SUMMARY_MAX_BYTES, STYLE_KEYS };
 
 export const domSummary = z
   .strictObject({
@@ -156,8 +129,17 @@ export type DomSummary = z.infer<typeof domSummary>;
 type ImageMime = "image/png" | "image/jpeg";
 type ImageHeader = { mime: ImageMime; w: number; h: number };
 
-/** Canonical, padded standard base64 — what Rust's `base64::STANDARD` engine accepts. */
-const BASE64 = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+/** The base64 alphabet followed by at most two `=`: one character class, so no backtracking. */
+const BASE64_CHARS = /^[A-Za-z0-9+/]*={0,2}$/;
+
+/**
+ * Canonical, padded standard base64 — what Rust's `base64::STANDARD` engine accepts: alphabet
+ * characters, then at most two `=`, the whole a multiple of 4 long. That is the same set as the
+ * grouped pattern `^(?:[A-Za-z0-9+/]{4})*(?:..==|...=)?$`, which was replaced because its
+ * per-group backtracking overflows the stack on a multi-megabyte image (V8 from about 4.47 M
+ * chars, below the 4 MiB limit; Firefox reports "too much recursion").
+ */
+const isCanonicalBase64 = (s: string): boolean => s.length % 4 === 0 && BASE64_CHARS.test(s);
 
 /** Decoded length of canonical base64, computed without decoding it. */
 const decodedLength = (b64: string): number =>
@@ -229,7 +211,7 @@ export function readImageHeader(bytes: string): ImageHeader | null {
 
 /** Why an image attachment's bytes break the contract, or `null` when they do not. */
 function imageProblem(img: { mime: ImageMime; data_b64: string; w: number; h: number }) {
-  if (!BASE64.test(img.data_b64)) {
+  if (!isCanonicalBase64(img.data_b64)) {
     return "data_b64 is not canonical base64";
   }
   if (decodedLength(img.data_b64) > MAX_IMAGE_BYTES) {

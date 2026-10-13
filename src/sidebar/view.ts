@@ -25,6 +25,7 @@ import type {
   ServerReply,
   StateDetail,
 } from "../channel.js";
+import { fitSend, reencodeJpeg } from "../capture.js";
 import {
   type ClientMsg,
   type Entry,
@@ -39,6 +40,10 @@ import type { Browser } from "../platform.js";
 import { z } from "zod";
 import { Composer, button, errorText, failureText } from "./composer.js";
 import { markdownFragment } from "./markdown.js";
+import { type BackgroundPort, type PortLike, connectBackground } from "./background-port.js";
+import { type PageDeps, type PickTool, mountPickTool } from "./pick-tool.js";
+import { type RecordTool, type RecorderApi, mountRecordTool } from "./record-tool.js";
+import { type ScreenshotTool, type ShotDeps, mountScreenshotTool } from "./screenshot-tool.js";
 import { NOTICES, type NoticeKey, TEXT, versionMismatchText } from "./text.js";
 
 /** The slice of `Channel` the view uses. */
@@ -58,10 +63,14 @@ export interface SidebarStorage {
 
 type RuntimeListener = (message: unknown, sender?: unknown) => void;
 
-/** `runtime`, as far as the view uses it: the picker's `picked` messages arrive here. */
+/**
+ * `runtime`, as far as the view uses it: the picker's `picked` messages arrive here, and the
+ * `sidebar` port to the background is opened through `connect` (absent in some tests).
+ */
 export interface SidebarRuntime {
   /** This extension's id; a `picked` message is accepted only from it. */
   id?: string;
+  connect?(info: { name: string }): PortLike;
   onMessage: {
     addListener(f: RuntimeListener): void;
     removeListener(f: RuntimeListener): void;
@@ -73,6 +82,16 @@ export interface SidebarDeps {
   storage: SidebarStorage;
   runtime: SidebarRuntime;
   platform: { BROWSER: Browser; HAS_DEBUGGER: boolean };
+  /**
+   * The browser APIs the page tools reach the page tab through (`tabs`, `windows`, `permissions`,
+   * `scripting`). Without them the Pick and Screenshot buttons stay disabled.
+   */
+  page?: PageDeps & ShotDeps;
+  /**
+   * The console/network recorder (`src/recorder.ts`), handed over by the Chrome build only. With
+   * it, `HAS_DEBUGGER` and `page`, the Record button works (R11.1, R11.9).
+   */
+  recorder?: RecorderApi;
   /** The structured logger; `console` when absent. */
   log?: Pick<Console, "info" | "warn">;
 }
@@ -208,6 +227,11 @@ class SidebarView {
   private entries: HTMLLIElement[] = [];
   private permissions = new Map<string, HTMLElement>();
   private pick: PickGeometry | null = null;
+  private readonly pickTool: PickTool | null;
+  private readonly shotTool: ScreenshotTool | null;
+  private readonly recordTool: RecordTool | null;
+  /** The `sidebar` port: announces this sidebar to the background and feeds the janitor. */
+  readonly backgroundPort: BackgroundPort | null;
 
   constructor(root: HTMLElement, deps: SidebarDeps) {
     this.doc = root.ownerDocument;
@@ -257,6 +281,7 @@ class SidebarView {
       channel: deps.channel,
       hasDebugger: deps.platform.HAS_DEBUGGER,
       log: this.log,
+      fitSend: (text, attachments) => fitSend(text, attachments, reencodeJpeg, this.log),
     });
 
     root.classList.add("zeo-sidebar");
@@ -272,6 +297,34 @@ class SidebarView {
     this.renderMenu();
     this.renderBanner();
     this.renderStatus(null);
+    this.pickTool = deps.page ? mountPickTool(this.composer, deps.page, this.log) : null;
+    this.shotTool =
+      deps.page && this.pickTool
+        ? mountScreenshotTool(this.composer, deps.page, this.pickTool, this.log)
+        : null;
+    const connect = deps.runtime.connect?.bind(deps.runtime);
+    this.backgroundPort = connect ? connectBackground({ connect }, this.log) : null;
+    // The shortcut's `start-picker` and its boot outcome arrive on the port (Task 4.5).
+    this.backgroundPort?.onMessage((message) => this.onBackgroundMessage(message));
+    this.recordTool =
+      deps.platform.HAS_DEBUGGER && deps.recorder && this.pickTool
+        ? mountRecordTool({
+            composer: this.composer,
+            pageTab: this.pickTool,
+            recorder: deps.recorder,
+            port: this.backgroundPort,
+            notice: (key) => this.composer.notify(NOTICES[key], NOTICE_TONE[key]),
+            log: this.log,
+            doc,
+          })
+        : null;
+  }
+
+  /** Removes the page tools' browser listeners and closes the background port. */
+  closeTools(): void {
+    this.pickTool?.close();
+    this.recordTool?.close();
+    this.backgroundPort?.close();
   }
 
   /** Restores the stored choice; must finish before the channel can report `ready`. */
@@ -842,13 +895,31 @@ class SidebarView {
     if (typeof message !== "object" || message === null) {
       return;
     }
-    // Only this extension's content script (a sender with a tab) may attach page elements.
+    // Only this extension may speak here; only its content script (a sender with a tab) may
+    // attach page elements.
     const from = (sender ?? {}) as { id?: unknown; tab?: unknown };
     const ownId = this.deps.runtime.id;
-    if (typeof ownId !== "string" || from.id !== ownId || from.tab == null) {
+    if (typeof ownId !== "string" || from.id !== ownId) {
       return;
     }
-    const m = message as { type?: unknown; items?: unknown; rects?: unknown; viewport?: unknown };
+    const type = (message as { type?: unknown }).type;
+    if (type === "start-picker" || type === "picker-status") {
+      // The background's notices only: a sender with a tab is a content script, never trusted.
+      if (from.tab == null) {
+        this.onBackgroundMessage(message);
+      }
+      return;
+    }
+    const m = message as {
+      type?: unknown;
+      items?: unknown;
+      rects?: unknown;
+      viewport?: unknown;
+      skipped?: unknown;
+    };
+    if (from.tab == null) {
+      return;
+    }
     if (m.type !== "picked" || !Array.isArray(m.items)) {
       return;
     }
@@ -864,15 +935,56 @@ class SidebarView {
     if (dropped > 0) {
       this.log.warn({ event: "sidebar_picked_dropped", count: dropped });
     }
+    // Elements the picker left out because no selector matches only them (R9.6).
+    if (typeof m.skipped === "number" && Number.isInteger(m.skipped) && m.skipped > 0) {
+      this.log.info({ event: "sidebar_picked_skipped", count: m.skipped });
+      this.composer.notify(TEXT.noSelector, "error");
+    }
     const geometry = pickGeometry.safeParse({ rects: m.rects, viewport: m.viewport });
     if (!geometry.success) {
       this.log.warn({ event: "sidebar_pick_geometry_dropped" });
     }
     this.pick = geometry.success ? geometry.data : null;
+    // "Include screenshot": the tab the elements were picked in, as the browser names the sender.
+    const tab = from.tab as { id?: unknown; windowId?: unknown };
+    if (
+      geometry.success &&
+      this.shotTool !== null &&
+      typeof tab.id === "number" &&
+      typeof tab.windowId === "number"
+    ) {
+      void this.shotTool.includeFor(geometry.data, { id: tab.id, windowId: tab.windowId });
+    }
   }
 
   lastPick(): PickGeometry | null {
     return this.pick;
+  }
+
+  /**
+   * The background's notices after the `start-picker` shortcut, from the `sidebar` port (or, from
+   * this extension only, as a runtime message). The background injected picker.js under the
+   * shortcut's activeTab grant; the chip receiver is always armed. `start-picker` re-reads the
+   * tab, picking up the URL that grant made readable; `picker-status` shows why the picker is not
+   * running in that tab. Nothing here may call permissions.request: there is no gesture.
+   */
+  onBackgroundMessage(message: unknown): void {
+    if (typeof message !== "object" || message === null) {
+      return;
+    }
+    const m = message as { type?: unknown; tabId?: unknown; status?: unknown };
+    if (m.type === "start-picker") {
+      this.pickTool?.refresh();
+      return;
+    }
+    if (
+      m.type === "picker-status" &&
+      Number.isSafeInteger(m.tabId) &&
+      (m.status === "protected" || m.status === "failed")
+    ) {
+      this.log.info({ event: "sidebar_shortcut_picker_not_started", reason: m.status });
+      this.pickTool?.showBoot(m.tabId as number, m.status);
+    }
   }
 }
 
@@ -908,6 +1020,7 @@ export async function mountSidebar(root: HTMLElement, deps: SidebarDeps): Promis
     lastPick: () => view.lastPick(),
     close: () => {
       runtime.onMessage.removeListener(onMessage);
+      view.closeTools();
       win?.removeEventListener("pagehide", onPageHide);
       win?.removeEventListener("pageshow", onPageShow);
       channel.close();

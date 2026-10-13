@@ -685,6 +685,44 @@ input {
   color: var(--bad);
 }
 
+.page-state {
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: 12px;
+}
+
+/* The recording indicator: "Recording console & network — Stop 0:12" (A7). */
+.recording {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  background: var(--bad-soft);
+  color: var(--bad);
+  font-size: 12px;
+}
+
+.recording-label::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: 0;
+}
+
+.recording-elapsed {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
 .composer-bar {
   display: flex;
   flex-wrap: wrap;

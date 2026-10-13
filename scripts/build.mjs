@@ -20,6 +20,24 @@ const ENTRIES = {
 };
 const STATIC = ["src/sidebar/index.html", "src/sidebar/style.css"];
 
+// picker.js must not carry zod (~800 KB injected on every pick). Its only route to zod is
+// src/picker/summary.ts, a byte-for-byte copy of zeo-devtools' file that imports "../contract.js";
+// for the picker entry that one import is resolved to the zod-free constants module instead.
+const SUMMARY = join(ROOT, "src/picker/summary.ts");
+const CONTRACT_CONSTANTS = join(ROOT, "src/contract-constants.ts");
+// The completion value of an injected file is the `result` executeScript hands back. picker.js
+// ends with this expression, so its result is the boot status ("mounted" | "protected" | "failed")
+// that src/picker/content.ts leaves under this key; src/picker/inject.ts reads it.
+const PICKER_STATUS_FOOTER = 'globalThis[Symbol.for("zeo-browser.picker")]?.status;';
+const pickerWithoutZod = {
+  name: "picker-without-zod",
+  setup(b) {
+    b.onResolve({ filter: /^\.\.\/contract\.js$/ }, (args) =>
+      args.importer === SUMMARY ? { path: CONTRACT_CONSTANTS } : undefined,
+    );
+  },
+};
+
 async function fsStep(what, path, fn) {
   try {
     return await fn();
@@ -50,6 +68,8 @@ async function buildBrowser(browser) {
       outfile: join(out, `${name}.js`),
       bundle: true,
       format: name === "picker" ? "iife" : "esm",
+      plugins: name === "picker" ? [pickerWithoutZod] : [],
+      footer: name === "picker" ? { js: PICKER_STATUS_FOOTER } : undefined,
       target: browser === "chrome" ? "chrome116" : "firefox128",
       platform: "browser",
       legalComments: "none",

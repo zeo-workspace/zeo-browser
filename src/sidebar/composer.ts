@@ -2,16 +2,20 @@
 // page-tool buttons and a notice line.
 //
 // - Send is disabled while the text and the attachments are both empty (R7.8), and `checkSend`
-//   runs before anything goes out, naming the limit a message breaks (R7.11).
+//   runs before anything goes out, naming the limit a message breaks (R7.11). A message over only
+//   the byte limit goes through `fitSend` first (re-encoding its PNGs, capture.ts), and is
+//   refused naming the limit when that cannot make it fit.
 // - The composer is cleared only on `sent`; on an `error` the text, the chips and the reason stay
 //   (R7.9). Removing a chip drops its attachment (R9.12).
 // - Stop sends `cancel` (R7.4).
 //
 // The page tools (picker, screenshot, recorder) are Task 4's. They reach the composer through
-// `attach` / `remove` / `notify` / `setTool`; a tool button stays disabled until its handler is
-// installed, and the handler runs synchronously inside the click so it can call
+// `attach` / `remove` / `notify` / `setTool` / `addStatusRow`; a tool button stays disabled until
+// its handler is installed, and the handler runs synchronously inside the click so it can call
 // `permissions.request` as its first statement (the Firefox user-input rule).
-import { type Attachment, type Status, checkSend } from "../contract.js";
+// `setPageProtected` disables every tool on a page the browser protects and says so (R9.9),
+// whatever handlers are installed.
+import { type Attachment, type SendLimit, type Status, checkSend } from "../contract.js";
 import { LIMIT_TEXT, TEXT } from "./text.js";
 import type { SidebarChannel } from "./view.js";
 
@@ -23,6 +27,16 @@ export interface ComposerDeps {
   /** Whether a Record button exists at all (Chrome's `debugger`, R11.9). */
   hasDebugger: boolean;
   log: Pick<Console, "info" | "warn">;
+  /**
+   * Makes a message over `MAX_SEND_BYTES` fit, or says which limit it still breaks (capture.ts
+   * `fitSend`). Without it such a message is refused as it is.
+   */
+  fitSend?: (
+    text: string,
+    attachments: readonly Attachment[],
+  ) => Promise<
+    { ok: true; attachments: Attachment[]; reencoded: number } | { ok: false; limit: SendLimit }
+  >;
 }
 
 interface Chip {
@@ -85,9 +99,11 @@ export class Composer {
   private readonly textarea: HTMLTextAreaElement;
   private readonly chipList: HTMLUListElement;
   private readonly noticeEl: HTMLElement;
+  private readonly pageEl: HTMLElement;
   private readonly sendButton: HTMLButtonElement;
   private readonly stopButton: HTMLButtonElement;
   private readonly includeShot: HTMLInputElement;
+  private readonly bar: HTMLElement;
   private readonly tools = new Map<
     ToolName,
     { button: HTMLButtonElement; handler: (() => void) | null }
@@ -97,6 +113,7 @@ export class Composer {
   private sending = false;
   private stopping = false;
   private turnRunning = false;
+  private pageProtected = false;
 
   constructor(doc: Document, deps: ComposerDeps) {
     this.doc = doc;
@@ -131,8 +148,14 @@ export class Composer {
     this.noticeEl.setAttribute("role", "status");
     this.noticeEl.setAttribute("aria-live", "polite");
 
+    this.pageEl = doc.createElement("p");
+    this.pageEl.className = "page-state";
+    this.pageEl.setAttribute("role", "status");
+    this.pageEl.hidden = true;
+
     const bar = doc.createElement("div");
     bar.className = "composer-bar";
+    this.bar = bar;
     const tools = doc.createElement("div");
     tools.className = "tools";
     this.addTool(tools, "pick", "Pick element");
@@ -156,7 +179,7 @@ export class Composer {
     actions.append(this.stopButton, this.sendButton);
     bar.append(tools, actions);
 
-    this.element.append(this.chipList, label, this.textarea, this.noticeEl, bar);
+    this.element.append(this.chipList, label, this.textarea, this.noticeEl, this.pageEl, bar);
     this.refresh();
   }
 
@@ -215,8 +238,29 @@ export class Composer {
     const tool = this.tools.get(name);
     if (tool) {
       tool.handler = handler;
-      tool.button.disabled = handler === null;
+      this.refreshTools();
     }
+  }
+
+  /**
+   * Marks the page as one the browser protects: Pick, Screenshot and Record are disabled and the
+   * protected sentence is shown until it is cleared with `false` (R9.9).
+   */
+  setPageProtected(on: boolean): void {
+    this.pageProtected = on;
+    this.pageEl.textContent = on ? TEXT.protectedPage : "";
+    this.pageEl.hidden = !on;
+    this.refreshTools();
+  }
+
+  /** Places a page tool's status row (the recording indicator) just above the buttons. */
+  addStatusRow(node: HTMLElement): void {
+    this.element.insertBefore(node, this.bar);
+  }
+
+  /** Whether the page is marked as protected. */
+  isPageProtected(): boolean {
+    return this.pageProtected;
   }
 
   /** Whether "Include screenshot" is on. */
@@ -237,9 +281,19 @@ export class Composer {
     b.disabled = true;
     const tool = { button: b, handler: null as (() => void) | null };
     // Synchronous on purpose: the handler's permissions.request must run inside the gesture.
-    b.addEventListener("click", () => tool.handler?.());
+    b.addEventListener("click", () => {
+      if (!this.pageProtected) {
+        tool.handler?.();
+      }
+    });
     this.tools.set(name, tool);
     parent.append(b);
+  }
+
+  private refreshTools(): void {
+    for (const tool of this.tools.values()) {
+      tool.button.disabled = this.pageProtected || tool.handler === null;
+    }
   }
 
   private isEmpty(): boolean {
@@ -275,7 +329,8 @@ export class Composer {
     const sentIds = new Set(this.chips.map((c) => c.id));
     const attachments = this.attachments();
     const verdict = checkSend(text, attachments);
-    if (!verdict.ok) {
+    const fit = this.deps.fitSend;
+    if (!verdict.ok && (verdict.limit !== "bytes" || fit === undefined)) {
       this.notify(LIMIT_TEXT[verdict.limit], "error");
       return;
     }
@@ -283,7 +338,23 @@ export class Composer {
     this.notify(null);
     this.refresh();
     try {
-      const reply = await this.deps.channel.request({ v: 2, kind: "send", text, attachments });
+      let outgoing = attachments;
+      if (!verdict.ok && fit !== undefined) {
+        const fitted = await fit(text, attachments);
+        if (!fitted.ok) {
+          this.notify(LIMIT_TEXT[fitted.limit], "error");
+          return;
+        }
+        this.deps.log.info({ event: "sidebar_send_reencoded", images: fitted.reencoded });
+        // The chips keep their originals: a send that fails is re-fitted the next time.
+        outgoing = fitted.attachments;
+      }
+      const reply = await this.deps.channel.request({
+        v: 2,
+        kind: "send",
+        text,
+        attachments: outgoing,
+      });
       if (reply.kind === "sent") {
         this.clearSent(sentIds);
         const lines: string[] = [];
