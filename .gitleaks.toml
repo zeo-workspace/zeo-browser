@@ -1,0 +1,21 @@
+# gitleaks configuration for zeo-browser.
+#
+# The default rules stay on. Two values are allowlisted, by value and never by path, so the
+# scanner still reads every other line of the files that hold them:
+#
+# - manifests/chrome.json `key`: the extension's PUBLIC key (an RSA SubjectPublicKeyInfo, the
+#   "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A" header). Chrome derives the fixed extension ID
+#   dhbddmompicnipfolmglmbnlpgglojid from it; the private half (*.pem) is gitignored and never
+#   committed.
+# - test/extension-id.test.ts KEY: a public-key fixture for the ID derivation test.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "public keys that fix or test the Chrome extension ID"
+regexTarget = "match"
+regexes = [
+  '''MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkd96BwLYK''',
+  '''MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA058\+VnT''',
+]
