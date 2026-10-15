@@ -56,8 +56,8 @@ Chrome will refuse to start the host for it.
 
 The add-on ID is **`zeo-browser@zeo.dev`**. The build is unsigned, so there are two routes.
 
-**Persistent (package manager).** With USE `browser-extension`, Zeo's ebuild installs the add-on
-into Firefox's system scope, as
+**Persistent (package manager).** The Gentoo package `www-plugins/zeo-browser` installs the
+add-on into Firefox's system scope, and Zeo's USE `browser-extension` pulls it in. It lands as
 `/usr/$(get_libdir)/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/zeo-browser@zeo.dev.xpi`.
 No step needs root beyond the package manager. Gentoo's source-built `www-client/firefox`
 accepts unsigned add-ons in that scope; Mozilla's signed `firefox-bin` does not, so it uses the
@@ -178,7 +178,7 @@ There is no `tabs` permission, and `<all_urls>` is never requested as a whole.
 | Read, write, stop, answer permissions | yes | yes |
 | Pick elements, screenshots | yes | yes |
 | Console & network recording | yes | **no**: there is no `debugger` API, so the control is not shown |
-| Install | Load unpacked (`dist/chrome`) | system scope through the ebuild, or temporary via `about:debugging` |
+| Install | Load unpacked (`dist/chrome`) | system scope through `www-plugins/zeo-browser`, or temporary via `about:debugging` |
 
 ## Test
 
