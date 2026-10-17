@@ -28,6 +28,8 @@ if (root === null) {
       windows: api.windows,
       permissions: api.permissions,
       scripting: api.scripting,
+      // Read when the address and screenshot sentences are shown, to name the Pick key (R9.10).
+      commands: api.commands,
     },
   }).catch((err: unknown) => {
     console.warn({

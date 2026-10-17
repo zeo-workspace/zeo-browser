@@ -193,8 +193,10 @@ describe("cropAndFit (R9.8, R10.3)", () => {
 // Requirements: R10.1, R10.6, R9.8, R7.11.
 describe("Screenshot button (R10.1, R10.6)", () => {
   const flushAll = () => new Promise((r) => setTimeout(r, 0));
+  // Task 13.3 (R10.8): the sentence names the key bound to start-picker; this fake page has no
+  // commands API, so nothing is bound and it names the shortcut instead of a key.
   const PERMISSION =
-    "Zeo needs this page's permission for screenshots: press Alt+Shift+E on the page or click the Zeo toolbar icon, then try again";
+    "Zeo needs this page's permission for screenshots: press the Pick element shortcut on the page or click the Zeo toolbar icon, then try again";
   const NO_ACTIVE_TAB = () =>
     new Error("screenshot failed", {
       cause: new Error("Either the '<all_urls>' or 'activeTab' permission is required."),

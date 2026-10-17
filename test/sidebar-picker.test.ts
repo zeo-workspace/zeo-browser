@@ -206,7 +206,9 @@ describe("Pick element (R9.1, R9.10)", () => {
     v.button(/pick element/i).click();
     await flush();
     expect(page.deps.permissions.request).not.toHaveBeenCalled();
-    expect(v.text()).toContain("Alt+Shift+E");
+    // Task 13.3 (R9.10): with no commands API in this fake, no key is bound to start-picker, so
+    // the sentence names the shortcut instead of a key (the key itself: pick-shortcut-sentences).
+    expect(v.text()).toContain("press the Pick element shortcut (Pick element)");
   });
 
   it("start-picker from the background re-reads the tab and never asks for a permission", async () => {

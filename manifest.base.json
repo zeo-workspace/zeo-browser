@@ -11,7 +11,7 @@
       "description": "Open the Zeo sidebar"
     },
     "start-picker": {
-      "suggested_key": { "default": "Alt+Shift+E" },
+      "suggested_key": { "default": "Alt+Shift+D" },
       "description": "Pick elements on this page for Zeo"
     }
   }

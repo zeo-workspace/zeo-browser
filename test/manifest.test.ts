@@ -79,10 +79,12 @@ describe("identity (R1.2) and minimum versions (Q11)", () => {
 });
 
 describe("commands (R8.3, R9.1)", () => {
-  it("both declare open-sidebar Alt+Shift+Y and start-picker Alt+Shift+E", () => {
+  // Task 13.3 (design.md §A1 v5): start-picker moved from Alt+Shift+E, which Firefox on Linux
+  // gives to the Edit menu, to Alt+Shift+D.
+  it("both declare open-sidebar Alt+Shift+Y and start-picker Alt+Shift+D", () => {
     for (const m of [chrome(), firefox()]) {
       expect(m.commands["open-sidebar"].suggested_key.default).toBe("Alt+Shift+Y");
-      expect(m.commands["start-picker"].suggested_key.default).toBe("Alt+Shift+E");
+      expect(m.commands["start-picker"].suggested_key.default).toBe("Alt+Shift+D");
     }
   });
 

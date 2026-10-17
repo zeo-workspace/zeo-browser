@@ -18,7 +18,7 @@
 //     every page.
 //   - site access follows Decision A8 (no `tabs`, no `<all_urls>`): the fixture tab's URL is
 //     hidden from the sidebar until an `activeTab` grant exists. `pressPickShortcut` sends a real
-//     Alt+Shift+E with `xdotool` to the page's X window — Playwright's keyboard goes through CDP
+//     Alt+Shift+D with `xdotool` to the page's X window — Playwright's keyboard goes through CDP
 //     and never reaches browser commands — which grants `activeTab`, starts the picker and makes
 //     the URL readable. So the browser runs headed, under `xvfb-run`. Chromium's per-site prompt
 //     (R9.13) cannot be accepted from here; it is proved in the live proof (task 9.4).
@@ -70,16 +70,16 @@ const T = {
   queued: "Queued in Zeo",
   protectedPage: "Zeo cannot read this page: the browser protects it",
   pageUnknown:
-    "Zeo cannot see this page's address yet: on that page, press Alt+Shift+E (Pick element) or click the Zeo toolbar icon",
+    "Zeo cannot see this page's address yet: on that page, press Alt+Shift+D (Pick element) or click the Zeo toolbar icon",
   screenshotPermission:
-    "Zeo needs this page's permission for screenshots: press Alt+Shift+E on the page or click the Zeo toolbar icon, then try again",
+    "Zeo needs this page's permission for screenshots: press Alt+Shift+D on the page or click the Zeo toolbar icon, then try again",
 };
 
 const run = promisify(execFile);
 
 // Refuse before anything launches unless this runs inside `xvfb-run` (`npm run e2e`): the spec
 // runs Chromium headed and types real key chords with xdotool, which on the desktop session would
-// open windows there and send Alt+Shift+E into the user's own apps. xvfb-run is recognised by the
+// open windows there and send Alt+Shift+D into the user's own apps. xvfb-run is recognised by the
 // Xauthority file it creates (`/tmp/xvfb-run.XXXXXX/Xauthority`), which an exported variable in a
 // shell profile cannot fake by accident.
 const UNDER_XVFB =
@@ -151,7 +151,7 @@ async function launch(withHost = true, path = "") {
   }
   context = await chromium.launchPersistentContext(profile, {
     channel: "chromium",
-    // Headed: browser commands (Alt+Shift+E) need a real X window, which Xvfb provides. X11 is
+    // Headed: browser commands (Alt+Shift+D) need a real X window, which Xvfb provides. X11 is
     // forced twice (no WAYLAND_DISPLAY, ozone x11) so the window cannot land on the desktop.
     headless: false,
     env: BROWSER_ENV,
@@ -215,7 +215,7 @@ async function xdotool(...args: string[]): Promise<string> {
 }
 
 /**
- * Presses a real key chord on the fixture page's window: browser commands (Alt+Shift+E,
+ * Presses a real key chord on the fixture page's window: browser commands (Alt+Shift+D,
  * Alt+Shift+Y) only come from the keyboard, never from Playwright's CDP input. The window is
  * found by a unique title set for the search and restored right after; X input focus goes to it
  * before the chord is typed.
@@ -237,9 +237,9 @@ async function pressShortcut(keys: string): Promise<void> {
 }
 
 /**
- * Alt+Shift+E: grants `activeTab`, opens the real side panel and starts the picker (Decision A8).
+ * Alt+Shift+D: grants `activeTab`, opens the real side panel and starts the picker (Decision A8).
  */
-const pressPickShortcut = () => pressShortcut("alt+shift+e");
+const pressPickShortcut = () => pressShortcut("alt+shift+d");
 
 /** The real side panel, which Playwright does not attach to, driven over raw CDP. */
 interface SidePanel {
@@ -557,7 +557,7 @@ test.describe("page tools", () => {
     expect(await permissionRequests(sidebar)).toBe(0);
     // The shortcut opens the real side panel, which hears `picker-status: protected` over its
     // port and turns the state on there (the popup stand-in's port is refused: it is a tab).
-    const panel = await openSidePanel("alt+shift+e");
+    const panel = await openSidePanel("alt+shift+d");
     await expect.poll(() => panelText(panel)).toContain(T.protectedPage);
     await expect.poll(() => panelButton(panel, "Pick element")).toBe("disabled");
     await expect.poll(() => panelButton(panel, "Screenshot")).toBe("disabled");

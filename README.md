@@ -99,15 +99,20 @@ What the sidebar tells you when something is missing:
 | Action | How |
 |---|---|
 | Open the sidebar | toolbar icon, or **`Alt+Shift+Y`** |
-| Pick elements on the page | **`Alt+Shift+E`** on the page, or **Pick element** in the sidebar. A plain click picks one element and stops. Shift+click adds or removes an element and keeps picking. Esc stops and attaches the set to the composer |
+| Pick elements on the page | **`Alt+Shift+D`** on the page, or **Pick element** in the sidebar. A plain click picks one element and stops. Shift+click adds or removes an element and keeps picking. Esc stops and attaches the set to the composer |
 | Screenshot | **Screenshot**, or **Include screenshot** with a pick |
 | Console & network (Chrome only) | **Record console & network**, then **Stop** (it stops by itself after 120 s) |
 
 You can change the shortcuts at `chrome://extensions/shortcuts` or in Firefox under
-`about:addons` → ⚙ → **Manage Extension Shortcuts**.
+`about:addons` → ⚙ → **Manage Extension Shortcuts**. The sidebar's sentences name whatever key
+is bound to **Pick element** when they are shown, and say "the Pick element shortcut" when none
+is. The default is `Alt+Shift+D` rather than a menu letter such as `E`: Firefox on Linux gives
+`Alt+<menu access key>` to its menu bar even with Shift held, and Chrome keeps several
+`Alt+Shift` letters for itself (`Alt+Shift+P` is "new tab group") and never hands them to an
+extension.
 
 **Why the shortcut or the toolbar icon comes first.** The extension does not ask for `tabs` or
-`<all_urls>`, so the browser hides a tab's address from it. Pressing `Alt+Shift+E` on a page,
+`<all_urls>`, so the browser hides a tab's address from it. Pressing `Alt+Shift+D` on a page,
 or clicking the toolbar icon there, grants `activeTab` for that tab. That grant makes the
 page's address readable, and it is what screenshots need. After that, **Pick element** in the
 sidebar asks the browser for that one site (`<origin>/*`). A click inside the sidebar grants
@@ -120,7 +125,7 @@ the shortcut or the icon on the page.
 |---|---|---|
 | `nativeMessaging` | both | to start `zeo-browser-host`, the only route to Zeo |
 | `sidePanel` | Chrome | to show the sidebar (Firefox uses `sidebar_action`, which needs no permission) |
-| `activeTab` | both | granted by `Alt+Shift+E` or the toolbar icon on a page: it makes the address readable and allows the screenshot |
+| `activeTab` | both | granted by `Alt+Shift+D` or the toolbar icon on a page: it makes the address readable and allows the screenshot |
 | `scripting` | both | to inject the picker into the page you chose, on demand and only in the top frame |
 | `storage` | both | to remember the thread choice and the settings, and never thread content |
 | `debugger` | Chrome | to record console and network, attached only while recording |

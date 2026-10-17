@@ -20,7 +20,8 @@
 //   ask for) or with access to that page. Until one of those exists the URL is unknown, no
 //   per-site permission can be named, and Pick says how to proceed instead (the operator's
 //   "shortcut first" decision): the shortcut or the toolbar icon grants `activeTab`, after which
-//   the URL is readable.
+//   the URL is readable. That sentence names the key bound to `start-picker`, read with
+//   `commands.getAll()` each time it is shown (pick-shortcut.ts; R9.10).
 //
 // The chips themselves arrive through the view's `picked` receiver; this module never builds one.
 // The Screenshot tool (screenshot-tool.ts) reads the same page tab through `current` and
@@ -28,7 +29,8 @@
 import { isProtectedUrl, startPick, type PickApi } from "../picker/inject.js";
 import type { PickerBootStatus } from "../sidebar-port.js";
 import type { Composer } from "./composer.js";
-import { TEXT } from "./text.js";
+import { type CommandsApi, pickShortcut } from "./pick-shortcut.js";
+import { TEXT, pageUnknownText } from "./text.js";
 
 interface BrowserEvent<F> {
   addListener(f: F): void;
@@ -37,6 +39,11 @@ interface BrowserEvent<F> {
 
 /** The slice of the WebExtension API the Pick tool uses (`api` from `src/platform.ts`). */
 export interface PageDeps extends PickApi {
+  /**
+   * Where the key bound to `start-picker` is read for the address sentence (R9.10). Absent, the
+   * sentence says "the Pick element shortcut".
+   */
+  commands?: CommandsApi;
   tabs: {
     query(q: { active: true; windowId: number }): Promise<Array<{ id?: number; url?: string }>>;
     onActivated: BrowserEvent<() => void>;
@@ -100,13 +107,22 @@ export function mountPickTool(
     ((t.url !== undefined && isProtectedUrl(t.url)) ||
       (foundProtected.has(t.id) && foundProtected.get(t.id) === t.url));
 
+  /** Bumped by every Pick click, so a late address sentence never overwrites a newer outcome. */
+  let pickSeq = 0;
+
   const onPick = (): void => {
     const target = tab;
     if (target === null) {
       return;
     }
+    const mine = ++pickSeq;
     if (target.url === undefined) {
-      composer.notify(TEXT.pageUnknown, "error");
+      // Nothing is requested on this path, so reading the key may await (R9.10, R9.13).
+      void pickShortcut(page.commands, log).then((shortcut) => {
+        if (mine === pickSeq) {
+          composer.notify(pageUnknownText(shortcut), "error");
+        }
+      });
       return;
     }
     // No await before this call: its first browser call is permissions.request.

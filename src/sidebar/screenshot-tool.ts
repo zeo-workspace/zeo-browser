@@ -6,10 +6,12 @@
 //   `Composer.setPageProtected`, whatever handler is installed.
 // - Permission rule (the operator's "shortcut first, least privilege" decision):
 //   `captureVisibleTab` needs `activeTab` or `<all_urls>`. `activeTab` comes from the shortcut
-//   (Alt+Shift+E) or the toolbar-icon click on the page; the per-origin optional host permission
-//   that Pick requests does NOT cover `captureVisibleTab`, and `<all_urls>` is never requested.
-//   So nothing here calls `permissions.request`: both paths capture directly, and a capture the
-//   browser rejects for missing permission shows `TEXT.screenshotPermission` and nothing else.
+//   (`start-picker`, default Alt+Shift+D) or the toolbar-icon click on the page; the per-origin
+//   optional host permission that Pick requests does NOT cover `captureVisibleTab`, and
+//   `<all_urls>` is never requested. So nothing here calls `permissions.request`: both paths
+//   capture directly, and a capture the browser rejects for missing permission shows
+//   `screenshotPermissionText` — naming the key bound to `start-picker`, read when it is shown
+//   (R10.8) — and nothing else.
 // - Screenshot: captures the whole visible area. A hidden URL does not block it: `activeTab` may
 //   be granted while the sidebar still cannot read the URL, and the capture does not need it.
 // - Include screenshot: when a pick is delivered with the toggle on, the visible area is captured
@@ -33,12 +35,15 @@ import {
 import { attachment as attachmentSchema } from "../contract.js";
 import type { OverlayMessage } from "../picker/content.js";
 import type { Composer } from "./composer.js";
+import { type CommandsApi, pickShortcut } from "./pick-shortcut.js";
 import type { PickTool } from "./pick-tool.js";
-import { TEXT } from "./text.js";
+import { TEXT, screenshotPermissionText } from "./text.js";
 
 /** The slice of the WebExtension API the Screenshot tool uses (`api` from `src/platform.ts`). */
 export interface ShotDeps {
   tabs: { sendMessage(tabId: number, message: OverlayMessage): Promise<unknown> };
+  /** Where the key named by the permission sentence is read (R10.8); absent, it says unbound. */
+  commands?: CommandsApi;
 }
 
 /** The capture functions, injectable for tests; `src/capture.ts` by default. */
@@ -83,13 +88,18 @@ const errorName = (err: unknown): string => (err instanceof Error ? err.name : t
 
 /**
  * The reason a screenshot failed, in words: the permission sentence when the browser refused the
- * capture for lack of `activeTab`, otherwise the cause's message.
+ * capture for lack of `activeTab` (naming the key bound to `start-picker`, read now from
+ * `commands`), otherwise the cause's message. Never rejects.
  */
-export function failureReason(err: unknown): string {
+export async function failureReason(
+  err: unknown,
+  commands?: CommandsApi,
+  log?: Pick<Console, "warn">,
+): Promise<string> {
   const cause = err instanceof Error && err.cause !== undefined ? err.cause : err;
   const message = cause instanceof Error ? cause.message : typeof cause === "string" ? cause : "";
   if (NO_PERMISSION.test(message)) {
-    return TEXT.screenshotPermission;
+    return screenshotPermissionText(await pickShortcut(commands, log));
   }
   return message ? `${TEXT.screenshotFailed}: ${message}` : TEXT.screenshotFailed;
 }
@@ -160,7 +170,7 @@ export function mountScreenshotTool(
       const failure =
         err instanceof Error && err.message === "screenshot failed" ? err : screenshotFailed(err);
       log.warn({ event: "sidebar_screenshot_failed", via, error: errorName(failure.cause) });
-      composer.notify(failureReason(failure), "error");
+      composer.notify(await failureReason(failure, page.commands, log), "error");
     }
   };
 
