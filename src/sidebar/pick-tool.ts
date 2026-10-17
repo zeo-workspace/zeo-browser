@@ -44,6 +44,11 @@ export interface PageDeps extends PickApi {
    * sentence says "the Pick element shortcut".
    */
   commands?: CommandsApi;
+  /**
+   * False in Firefox: the site asked for is named without its port, since Firefox matches no tab
+   * against a pattern that names one (R9.13, R9.20). Absent, the port is kept (Chrome).
+   */
+  sitePatternKeepsPort?: boolean;
   tabs: {
     query(q: { active: true; windowId: number }): Promise<Array<{ id?: number; url?: string }>>;
     onActivated: BrowserEvent<() => void>;
@@ -126,7 +131,11 @@ export function mountPickTool(
       return;
     }
     // No await before this call: its first browser call is permissions.request.
-    const started = startPick({ id: target.id, url: target.url }, page);
+    const started = startPick(
+      { id: target.id, url: target.url },
+      page,
+      page.sitePatternKeepsPort ?? true,
+    );
     const url = target.url;
     composer.notify(null);
     refresh();

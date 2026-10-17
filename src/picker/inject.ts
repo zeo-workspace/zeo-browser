@@ -65,9 +65,10 @@ export function isProtectedUrl(url: string): boolean {
 
 /**
  * The host-permission pattern of `url`'s site (`https://app.example/*`), or null for a scheme
- * no host permission can name (data:, blob:, …).
+ * no host permission can name (data:, blob:, …). `keepPort` false drops the port: Firefox accepts
+ * a pattern that names one, but it then matches no tab (measured on Firefox 158, story 045 F5).
  */
-export function originPattern(url: string): string | null {
+export function originPattern(url: string, keepPort = true): string | null {
   let parsed: URL;
   try {
     parsed = new URL(url);
@@ -75,7 +76,7 @@ export function originPattern(url: string): string | null {
     return null;
   }
   if (parsed.protocol === "http:" || parsed.protocol === "https:") {
-    return `${parsed.origin}/*`;
+    return keepPort ? `${parsed.origin}/*` : `${parsed.protocol}//${parsed.hostname}/*`;
   }
   if (parsed.protocol === "file:") {
     // A file: URL's origin is "null"; its pattern is the scheme with an empty host.
@@ -114,8 +115,9 @@ const PROTECTED: StartPickResult = { ok: false, reason: "protected", message: TE
 export async function startPick(
   tab: { id: number; url: string },
   browser: PickApi,
+  keepPort = true,
 ): Promise<StartPickResult> {
-  const pattern = isProtectedUrl(tab.url) ? null : originPattern(tab.url);
+  const pattern = isProtectedUrl(tab.url) ? null : originPattern(tab.url, keepPort);
   if (pattern === null) {
     return PROTECTED;
   }
