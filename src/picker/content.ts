@@ -1,5 +1,5 @@
 // The picker content script (story 045, design.md §A5; R9.1–R9.6, R9.9, R9.11). Injected on
-// demand with `scripting.executeScript({files: ["picker.js"]})` into the top frame, bundled as
+// demand with `scripting.executeScript({files: ["/picker.js"]})` into the top frame, bundled as
 // one IIFE whose completion value is the boot status (see `boot` and scripts/build.mjs).
 //
 // - Overlay: a `<div>` host holding a CLOSED shadow root, so the page's styles cannot reach it and

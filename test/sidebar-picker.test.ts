@@ -187,7 +187,7 @@ describe("Pick element (R9.1, R9.10)", () => {
     await flush();
     expect(page.deps.scripting.executeScript).toHaveBeenCalledWith({
       target: { tabId: 7 },
-      files: ["picker.js"],
+      files: ["/picker.js"],
     });
   });
 

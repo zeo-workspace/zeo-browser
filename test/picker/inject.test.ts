@@ -72,7 +72,7 @@ describe("startPick (R9.1, R9.10)", () => {
     const r = await startPick({ id: 7, url: "https://app.example/" }, a as any);
     expect(r).toEqual({ ok: true });
     expect(a.scripting.executeScript).toHaveBeenCalledWith(
-      expect.objectContaining({ target: { tabId: 7 }, files: ["picker.js"] }),
+      expect.objectContaining({ target: { tabId: 7 }, files: ["/picker.js"] }),
     );
   });
 

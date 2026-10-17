@@ -29,7 +29,13 @@ const OLD_STORE_PATH = "/webstore";
  */
 const NO_ACCESS = /Cannot access|Missing host permission/i;
 
-export const PICKER_FILE = "picker.js";
+/**
+ * Absolute on purpose. Firefox resolves a relative `files` entry against the calling page, so
+ * "picker.js" called from the sidebar (`sidebar/index.html`) became `sidebar/picker.js` and
+ * failed to load; Chrome resolves it against the extension root. A leading slash means the
+ * root in both.
+ */
+export const PICKER_FILE = "/picker.js";
 
 /**
  * Whether the browser forbids scripting `url` (R9.9). The URL is parsed and compared by scheme,

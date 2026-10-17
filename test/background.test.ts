@@ -161,7 +161,7 @@ describe("start-picker injection and boot status (R9.1, R9.9, amendment)", () =>
       await tick();
       expect(f.api.scripting.executeScript).toHaveBeenCalledWith({
         target: { tabId: 3 },
-        files: ["picker.js"],
+        files: ["/picker.js"],
       });
       expect(f.api.permissions.request).not.toHaveBeenCalled();
       const s = sidebarPort();
