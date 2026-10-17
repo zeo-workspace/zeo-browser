@@ -1,0 +1,50 @@
+<!doctype html>
+<!-- Story 045 E2E fixture, task 13.4 (R9.19): a modal <dialog>, opened with showModal() at load,
+     holding a button and an iframe. Everything outside an open modal is inert, so a picker overlay
+     left outside it is never hit-tested. Taken from the 2026-10-17 live-proof harness
+     (docs/assets/045-live-proof-2026-10-17/harness/modal.html), plus:
+       - #outside-btn, an enabled button outside any dialog, for the "modal closed" case;
+       - #dlg2 / #frame2, a second modal the spec stacks on top, for the "topmost" case;
+       - click counters the picker must keep at zero (R9.5). -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Modal fixture</title>
+  </head>
+  <body>
+    <h1>Modal fixture</h1>
+    <button id="outside-btn" type="button">Outside action</button>
+    <button id="disabled-btn" type="button" disabled>Disabled action</button>
+    <dialog id="dlg">
+      <p id="in-dialog">Inside the modal dialog</p>
+      <button id="dialog-btn" type="button">Dialog button</button>
+      <button id="dialog-disabled" type="button" disabled>Disabled in dialog</button>
+      <iframe
+        id="frame"
+        title="framed"
+        srcdoc="<p id='framed'>Inside an iframe under the modal</p>"
+        width="300"
+        height="80"
+      ></iframe>
+    </dialog>
+    <dialog id="dlg2">
+      <p id="in-dialog2">Inside the second modal dialog</p>
+      <iframe
+        id="frame2"
+        title="framed2"
+        srcdoc="<p id='framed2'>Inside an iframe under the second modal</p>"
+        width="300"
+        height="80"
+      ></iframe>
+    </dialog>
+    <script>
+      window.dialogClicks = 0;
+      window.outsideClicks = 0;
+      document.getElementById("dialog-btn").addEventListener("click", () => window.dialogClicks++);
+      document
+        .getElementById("outside-btn")
+        .addEventListener("click", () => window.outsideClicks++);
+      window.addEventListener("load", () => document.getElementById("dlg").showModal());
+    </script>
+  </body>
+</html>

@@ -10,6 +10,11 @@
 //   it is raised again when a newer one opens. It draws the hover highlight, the
 //   `<tag> · <selector>` label and an outline per pending element; `pointer-events: none` keeps it
 //   out of hit testing, except the shield over a hovered frame.
+// - Under a modal dialog (R9.19): an open modal makes everything outside it inert, a top-layer
+//   popover included, and inert nodes are skipped by hit testing — the shield would never take a
+//   press. While a modal is open the host is the last child of the topmost one, re-checked when
+//   the picker starts, on every hover and when a dialog or popover toggles; it goes back under
+//   the root element when the modals close, and leaves the page with the picker.
 // - Picking: a primary-button press picks on `pointerdown` — a disabled control gets pointer
 //   events but no click. A plain press picks that element (plus any pending ones) and ends;
 //   Shift+press toggles an element in the pending set; Esc ends and delivers the pending set.
@@ -20,7 +25,9 @@
 //   script can prevent that.
 // - Frames: listeners in the top frame never see input inside an iframe, so a hovered
 //   iframe/frame/embed/object is covered by a shield that takes pointer events; a press on it
-//   picks the frame element itself.
+//   picks the frame element itself. Entering a frame is seen as a `pointerover`/`mouseover` on
+//   it; a frame the pointer already rests on (no event will come) is read from `:hover` when the
+//   picker starts or the host moves.
 // - Target: `composedPath()[0]`, the innermost element a window listener may see. It is kept when
 //   it is in the light DOM, or in an open shadow root with a selector unique in that root (the
 //   selector is then scoped to that root); otherwise the shadow host is used, walking outwards.
@@ -279,6 +286,55 @@ function raise(host: HTMLElement): void {
   }
 }
 
+const isModal = (dialog: Element): boolean => {
+  try {
+    return dialog.matches(":modal");
+  } catch {
+    // An engine without `:modal` has no way to say which dialog blocks the page.
+    return false;
+  }
+};
+
+/**
+ * The open modal dialog on top, or null when none is open. With several, the top one is found by
+ * hit testing: everything outside it is inert and skipped, so a point inside any open modal lands
+ * in the top one (its content, or its backdrop, which hits the dialog). Document order is the
+ * fallback when no probe lands in a modal. Dialogs inside shadow roots are not seen.
+ */
+function topmostModal(doc: Document): Element | null {
+  const modals = Array.from(doc.querySelectorAll("dialog")).filter(isModal);
+  if (modals.length <= 1) {
+    return modals[0] ?? null;
+  }
+  for (const dialog of modals) {
+    const r = dialog.getBoundingClientRect();
+    const x = Math.min(Math.max(r.x + r.width / 2, 0), window.innerWidth - 1);
+    const y = Math.min(Math.max(r.y + r.height / 2, 0), window.innerHeight - 1);
+    const hit = doc.elementFromPoint(x, y)?.closest("dialog");
+    if (hit != null && modals.includes(hit)) {
+      return hit;
+    }
+  }
+  return modals.at(-1) ?? null;
+}
+
+/**
+ * The frame the pointer rests on, read from `:hover`: entering a frame before the picker started
+ * (or before the shield could take input) sends this document no event, and moving inside it
+ * sends none either. Null when the innermost hovered element is not a frame.
+ */
+function frameUnderPointer(doc: Document): Element | null {
+  let chain: NodeListOf<Element>;
+  try {
+    chain = doc.querySelectorAll(":hover");
+  } catch {
+    return null;
+  }
+  // The hover chain runs from the root down: the innermost element comes last.
+  const innermost = chain.item(chain.length - 1);
+  return innermost !== null && isFrame(innermost) ? innermost : null;
+}
+
 /** Starts the picker on this page: mounts the overlay and takes over pointer input. */
 export function startPicker(options: PickerOptions): PickerHandle {
   const doc = document;
@@ -306,7 +362,9 @@ export function startPicker(options: PickerOptions): PickerHandle {
   if (canPopover(host)) {
     host.setAttribute("popover", "manual");
   }
-  doc.documentElement.append(host);
+  /** Where the host is hit-tested: the topmost open modal dialog, else the root element. */
+  const hostParent = (): Element => topmostModal(doc) ?? doc.documentElement;
+  hostParent().append(host);
   raise(host);
 
   let active = true;
@@ -441,8 +499,7 @@ export function startPicker(options: PickerOptions): PickerHandle {
     listen,
   );
 
-  const onHover = (event: Event) => {
-    const target = subjectOf(event);
+  const hoverOn = (target: Element | null) => {
     if (target !== hovered) {
       hovered = target;
       hoveredLabel =
@@ -452,8 +509,46 @@ export function startPicker(options: PickerOptions): PickerHandle {
     }
     renderHover();
   };
+
+  /** Hovers the frame the pointer already rests on, which will send this document no event. */
+  const hoverFrameUnderPointer = () => {
+    const frame = frameUnderPointer(doc);
+    if (frame !== null) {
+      hoverOn(frame);
+    }
+  };
+
+  /**
+   * Moves the host under the topmost open modal, or back under the root element, when that
+   * changed; otherwise raises it when `raiseInPlace`. A host the page removed is left alone: the
+   * removal observer ends the picker.
+   */
+  const settleHost = (raiseInPlace: boolean) => {
+    if (!host.isConnected) {
+      return;
+    }
+    const parent = hostParent();
+    if (host.parentElement === parent) {
+      if (raiseInPlace) {
+        raise(host);
+      }
+      return;
+    }
+    // Removing a popover from the tree hides it, so it is shown again in its new place.
+    parent.append(host);
+    raise(host);
+    hoverFrameUnderPointer();
+  };
+
+  const onHover = (event: Event) => {
+    settleHost(false);
+    hoverOn(subjectOf(event));
+  };
   window.addEventListener("pointermove", onHover, listen);
+  // Entering a frame sends this document only the boundary events, targeted at the frame.
+  window.addEventListener("pointerover", onHover, listen);
   window.addEventListener("mouseover", onHover, listen);
+  hoverFrameUnderPointer();
 
   window.addEventListener(
     "keydown",
@@ -478,26 +573,28 @@ export function startPicker(options: PickerOptions): PickerHandle {
     { passive: true, capture: true, signal: lifetime.signal },
   );
 
-  // A newer top-layer element (popover, dialog, fullscreen) would cover the overlay: raise it.
+  // A newer top-layer element (popover, dialog, fullscreen) would cover the overlay: raise it, in
+  // the topmost modal if one opened, back at the root if it closed.
   const onTopLayerChange = (event: Event) => {
     if (event.target !== host) {
-      raise(host);
+      settleHost(true);
     }
   };
   window.addEventListener("toggle", onTopLayerChange, listen);
   doc.addEventListener("fullscreenchange", onTopLayerChange, listen);
 
-  // The page removing the overlay ends the picker. A dialog opening raises it (older browsers
+  // The page removing the overlay ends the picker, including removing the dialog that holds it
+  // (hence the whole subtree). A dialog opening or closing places and raises it (older browsers
   // fire no toggle event for dialogs).
   const removal = new MutationObserver(() => {
     if (!host.isConnected) {
       end([]);
     }
   });
-  removal.observe(doc.documentElement, { childList: true });
+  removal.observe(doc.documentElement, { childList: true, subtree: true });
   const dialogs = new MutationObserver((records) => {
     if (records.some((r) => r.target !== host)) {
-      raise(host);
+      settleHost(true);
     }
   });
   dialogs.observe(doc.documentElement, { subtree: true, attributeFilter: ["open"] });
