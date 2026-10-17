@@ -5,8 +5,10 @@
 // awaited anything. So in every listener the open call is the first browser call, nothing is
 // awaited before it, and its promise only gets a `.catch` that logs the error kind.
 //
-// - Chrome: the toolbar icon opens the side panel by itself (`openPanelOnActionClick`, set at
-//   install); `open-sidebar` and `start-picker` call `sidePanel.open({windowId})`.
+// - Chrome: the toolbar click, `open-sidebar` and `start-picker` all call
+//   `sidePanel.open({windowId})`. `openPanelOnActionClick` is set to false at install: with it on,
+//   Chrome opens the panel itself and the click is no action invocation, so it grants no
+//   `activeTab` (measured on Chrome 155, story 045 live proof F1).
 // - Firefox: the toolbar click toggles the sidebar; both commands open it. Firefox has no
 //   `_execute_sidebar_action` command here, so `open-sidebar` is this listener's.
 // - `start-picker` then injects picker.js into the shortcut's tab under the `activeTab` grant the
@@ -230,8 +232,12 @@ export function installSidebarActions(
   if (browser === "chrome") {
     api.runtime.onInstalled.addListener(() => {
       api.sidePanel
-        ?.setPanelBehavior({ openPanelOnActionClick: true })
+        ?.setPanelBehavior({ openPanelOnActionClick: false })
         .catch(logFailure("sidebar_panel_behavior_failed"));
+    });
+    api.action.onClicked.addListener((tab) => {
+      // First statement: the open must stay inside the click's gesture.
+      openSidebar(tab);
     });
   } else {
     api.action.onClicked.addListener(() => {

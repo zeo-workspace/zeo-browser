@@ -73,10 +73,12 @@ afterEach(() => vi.doUnmock("../src/platform.js"));
 const TAB = { id: 3, windowId: 9, url: "https://app.example/" };
 
 describe("Chrome", () => {
-  it("sets openPanelOnActionClick at install (R8.1)", async () => {
+  it("sets openPanelOnActionClick to false at install, so the click grants activeTab (R8.1)", async () => {
     const f = await load("chrome");
     fire(f, "onInstalled", { reason: "install" });
-    expect(f.api.sidePanel.setPanelBehavior).toHaveBeenCalledWith({ openPanelOnActionClick: true });
+    expect(f.api.sidePanel.setPanelBehavior).toHaveBeenCalledWith({
+      openPanelOnActionClick: false,
+    });
   });
 
   it("hostile: open-sidebar calls sidePanel.open synchronously and first (R8.3)", async () => {
