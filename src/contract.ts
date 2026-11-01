@@ -407,7 +407,9 @@ export type ClientMsg<K extends ClientKind = ClientKind> = Extract<
 // ---------------------------------------------------------------------------------------------
 // Server messages (Zeo or the host → extension)
 
-const STATES = ["idle", "working", "awaiting_permission", "error"] as const;
+// `unconfirmed`: a resumed session whose activity the agent has not reported yet; Zeo has sent
+// it since 0.7.0, and 0.1.x refused the whole message for it.
+const STATES = ["idle", "working", "unconfirmed", "awaiting_permission", "error"] as const;
 
 const status = z.strictObject({ state: z.enum(STATES), message: z.string().nullable() });
 export type Status = z.infer<typeof status>;
@@ -459,6 +461,14 @@ const permission = z.strictObject({
 });
 export type Permission = z.infer<typeof permission>;
 
+// One child of the snapshot's thread (Zeo 0.8.0, story 064): its label and R1.3's status.
+// Strict per entry, like every other part of the wire.
+const subagent = z.strictObject({
+  title: z.string(),
+  status: z.enum(["running", "waiting", "done", "failed", "canceled", "unknown"]),
+});
+export type Subagent = z.infer<typeof subagent>;
+
 const index = z.int().min(0);
 
 const serverSchemas = {
@@ -485,6 +495,8 @@ const serverSchemas = {
     entries: z.array(entry).max(MAX_SNAPSHOT_ENTRIES),
     status,
     permissions: z.array(permission),
+    // Absent for a thread without children, never `null`.
+    subagents: z.array(subagent).optional(),
   }),
   target_changed: z.strictObject({
     v: v2,
