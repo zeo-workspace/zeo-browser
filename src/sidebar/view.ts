@@ -144,6 +144,8 @@ const toWire = (t: StoredTarget): WireTarget =>
 const STATUS_WORDS: Record<Status["state"], string> = {
   idle: "Idle",
   working: "Working…",
+  // A resumed session the agent has not reported on yet: neither working nor known idle.
+  unconfirmed: "Not confirmed yet",
   awaiting_permission: "Waiting for permission",
   error: "Error",
 };
