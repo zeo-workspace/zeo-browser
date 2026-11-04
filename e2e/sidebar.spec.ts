@@ -73,6 +73,7 @@ const T = {
     "Zeo cannot see this page's address yet: on that page, press Alt+Shift+D (Pick element) or click the Zeo toolbar icon",
   screenshotPermission:
     "Zeo needs this page's permission for screenshots: press Alt+Shift+D on the page or click the Zeo toolbar icon, then try again",
+  recording: "Recording console & network",
 };
 
 const run = promisify(execFile);
@@ -617,7 +618,7 @@ test.describe("page tools", () => {
     await launch();
     const sidebar = await openReadySidebar();
     await countPermissionRequests(sidebar);
-    await sidebar.getByRole("button", { name: /screenshot/i }).click();
+    await sidebar.getByRole("button", { name: "Screenshot", exact: true }).click();
     await expect(sidebar.getByText(T.screenshotPermission)).toBeVisible();
     expect(await permissionRequests(sidebar)).toBe(0);
     await sidebar.getByRole("textbox").fill("look");
@@ -634,7 +635,8 @@ test.describe("page tools", () => {
     await waitForPicker(true);
     await page.keyboard.press("Escape");
     await waitForPicker(false);
-    const shot = sidebar.getByRole("button", { name: /screenshot/i });
+    // Exact: once the first chip shows, /screenshot/i would also match its "Remove Screenshot …".
+    const shot = sidebar.getByRole("button", { name: "Screenshot", exact: true });
     await shot.click();
     await shot.click();
     await shot.click();
@@ -657,6 +659,9 @@ test.describe("page tools", () => {
     const tabId = await fixtureTabId();
     expect(await extensionAttached(tabId)).toBe(false);
     await sidebar.getByRole("button", { name: /record/i }).click();
+    // extensionAttached probes with its own attach, which could take the debugger while Record is
+    // still attaching; the recording row shows only once Record's attach succeeded.
+    await expect(sidebar.getByText(T.recording)).toBeVisible();
     await expect.poll(() => extensionAttached(tabId)).toBe(true);
     await page.evaluate(() => (window as unknown as { makeNoise(): void }).makeNoise());
     await page.waitForTimeout(500);
@@ -672,6 +677,7 @@ test.describe("page tools", () => {
     await panel.evaluate(
       `[...document.querySelectorAll("button")].find((b) => b.textContent.trim() === "Record").click()`,
     );
+    await expect.poll(async () => (await panelText(panel)).includes(T.recording)).toBe(true);
     await expect.poll(() => extensionAttached(tabId)).toBe(true);
     await panel.close();
     await expect.poll(() => extensionAttached(tabId), { timeout: 5000 }).toBe(false);
