@@ -214,6 +214,13 @@ desktop would land in your own windows. The run needs these things, and without
   `--load-extension`, and Playwright's Firefox cannot load extensions. Firefox is covered by
   the unit tests of the shared code and by a manual live proof.
 
+### Dependency overrides
+
+`package.json` forces `minimatch` 11.0.1 under eslint and typescript-eslint, which still
+declare `^10`: 10.x carries GHSA-g3hv-75wg-m249. It also pins `@isaacs/nonrecursive-glob-match`
+1.0.1, the newest of minimatch's own dependency that was at least seven days old when the
+override was written. Drop both overrides once eslint and typescript-eslint accept minimatch 11.
+
 ## Licence
 
 Apache-2.0. See [LICENSE](LICENSE).
