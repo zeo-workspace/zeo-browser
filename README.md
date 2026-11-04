@@ -214,6 +214,27 @@ desktop would land in your own windows. The run needs these things, and without
   `--load-extension`, and Playwright's Firefox cannot load extensions. Firefox is covered by
   the unit tests of the shared code and by a manual live proof.
 
+### The whole suite in a clean guest
+
+```bash
+scripts/ci-vm.sh --fetch   # first run: downloads the pinned cloud image and Node (sha256-checked)
+scripts/ci-vm.sh           # later runs; --ref <rev> tests another commit
+```
+
+It boots a throwaway KVM guest with libvirt (`qemu:///session`: membership in the `libvirt`
+and `kvm` groups is enough, no root). It clones the commit and runs every check from a clean
+tree: `npm ci`, format, lint, typecheck, unit, build and the e2e specs in Chromium, with
+`zeo-browser-host` copied in from `/usr/libexec` or `ZEO_BROWSER_HOST_BIN`. A skipped e2e spec
+fails the run. It also writes the Chrome zip and its `SHA256SUMS`. Logs and artefacts land in
+`ci-vm-logs/`, and the guest and its disks are destroyed however the run ends. The guest cannot
+reach services on the host's loopback.
+
+### Pull requests
+
+`.github/workflows/pr.yml` runs typecheck, the unit tests and `npm audit --audit-level=high` on
+every pull request, so a Dependabot PR arrives checked. It is deliberately small: run the suite
+above before pushing.
+
 ### Dependency overrides
 
 `package.json` forces `minimatch` 11.0.1 under eslint and typescript-eslint, which still

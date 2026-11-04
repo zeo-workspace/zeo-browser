@@ -1,6 +1,6 @@
 {
   "name": "zeo-browser",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Chrome and Firefox sidebar that shows and drives the Zeo agent thread over native messaging.",
   "private": true,
   "type": "module",

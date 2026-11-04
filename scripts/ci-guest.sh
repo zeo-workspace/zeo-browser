@@ -58,6 +58,30 @@ browsers() {
   return 1
 }
 
+# The release assets come from the guest that just tested them: the Chrome zip, made with the
+# repository's deterministic store-only zip (scripts/zip.mjs), and its SHA256SUMS line.
+package() {
+  local version out
+  version=$(node -p 'require("./package.json").version')
+  out="$logs/artifacts"
+  mkdir -p "$out"
+  node --input-type=module -e '
+    import { readdir, readFile, writeFile } from "node:fs/promises";
+    import { join, relative, sep } from "node:path";
+    import { storeZip } from "./scripts/zip.mjs";
+    const [dir, dest] = process.argv.slice(1);
+    const files = [];
+    for (const e of await readdir(dir, { recursive: true, withFileTypes: true })) {
+      if (!e.isFile()) continue;
+      const full = join(e.parentPath, e.name);
+      files.push({ name: relative(dir, full).split(sep).join("/"), data: await readFile(full) });
+    }
+    await writeFile(dest, storeZip(files));
+  ' dist/chrome "$out/zeo-browser-chrome-$version.zip"
+  (cd "$out" && sha256sum "zeo-browser-chrome-$version.zip" >"SHA256SUMS-zeo-browser-$version")
+  cat "$out/SHA256SUMS-zeo-browser-$version"
+}
+
 versions() {
   node --version
   npm --version
@@ -79,3 +103,4 @@ step build npm run build
 # System libraries were installed by root before the suite (ci-vm.sh); only the browser here.
 step browsers browsers
 step e2e e2e_no_skips
+step package package

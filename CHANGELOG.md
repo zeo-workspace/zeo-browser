@@ -4,6 +4,27 @@ All notable changes to zeo-browser are written here, in the format of
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/). Earlier history lives in the git log.
 
+## [0.2.1] — 2026-11-03
+
+Maintenance release: the extension behaves exactly as 0.2.0.
+
+### Security
+
+- Development dependencies: vite 8.3.5, happy-dom 21.0.4 and minimatch 11.0.1 (forced through
+  `overrides` under eslint and typescript-eslint) remove GHSA-698v-4r3x-3vcv and five other vite
+  advisories, GHSA-834v-8h66-3h79, GHSA-c8p4-j97h-3vg8 and GHSA-g3hv-75wg-m249. None of them is
+  in the extension. `npm audit` and `osv-scanner` now report nothing.
+- Regression tests pin markdown-it 15.0.3, shipped in 0.2.0: render time grows linearly on
+  GHSA-gfr2-rv44-r23c's input, ordinary Markdown renders as before, and an e2e spec checks that
+  the built sidebar is not held back by a 200 000-line unclosed definition.
+
+### Added
+
+- `scripts/ci-vm.sh` runs every check from a fresh clone in a disposable KVM guest, and builds
+  the release zip there.
+- Every pull request is checked by a minimal GitHub workflow: typecheck, unit tests and a
+  lockfile audit.
+
 ## [0.2.0] — 2026-11-03
 
 Pairs with Zeo 0.8.0.
