@@ -1,7 +1,7 @@
 # Security updates are enabled in the repository settings (2026-10-17); this
-# file adds version updates, which nothing ran here before. npm only: the
-# repository has no workflows yet. It has no CI either, so a Dependabot PR
-# here is unverified until its checks are run locally.
+# file adds version updates, which nothing ran here before. Each PR is checked
+# by .github/workflows/pr.yml (typecheck, unit tests, lockfile audit); the full
+# suite runs locally with scripts/ci-vm.sh.
 version: 2
 updates:
   - package-ecosystem: "npm"
@@ -25,5 +25,13 @@ updates:
     # (mitigates freshly-compromised releases). It holds back DIRECT
     # dependencies only; transitive versions the resolver pulls into the
     # lockfile are not gated by it.
+    cooldown:
+      default-days: 7
+  # The workflow's actions are pinned by commit SHA; this keeps those pins
+  # current (story 068).
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
     cooldown:
       default-days: 7

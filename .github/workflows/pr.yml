@@ -1,0 +1,35 @@
+# Story 068, task 3.1 — the one check that cannot run locally: verifying a pull request
+# (Dependabot's above all) with nobody at the machine. The full suite — format, lint, e2e in
+# Chromium, the build — runs in a clean KVM guest with scripts/ci-vm.sh before anything is pushed;
+# this gate is deliberately small: typecheck, unit tests and a lockfile audit.
+name: pr
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+# A newer push to the same pull request makes the older run moot.
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          # The Node scripts/ci-vm.sh pins, inside package.json's engines (>=24).
+          node-version: 24.22.2
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm audit --package-lock-only --audit-level=high
