@@ -59,7 +59,9 @@ browsers() {
 }
 
 # The release assets come from the guest that just tested them: the Chrome zip, made with the
-# repository's deterministic store-only zip (scripts/zip.mjs), and its SHA256SUMS line.
+# repository's deterministic store-only zip (scripts/zip.mjs), the Firefox build that
+# scripts/build.mjs already zipped (renamed .xpi, the name distribution packages fetch), and
+# one SHA256SUMS line for each.
 package() {
   local version out
   version=$(node -p 'require("./package.json").version')
@@ -78,7 +80,9 @@ package() {
     }
     await writeFile(dest, storeZip(files));
   ' dist/chrome "$out/zeo-browser-chrome-$version.zip"
-  (cd "$out" && sha256sum "zeo-browser-chrome-$version.zip" >"SHA256SUMS-zeo-browser-$version")
+  cp dist/zeo-browser-firefox.zip "$out/zeo-browser-firefox-$version.xpi"
+  (cd "$out" && sha256sum "zeo-browser-chrome-$version.zip" "zeo-browser-firefox-$version.xpi" \
+    >"SHA256SUMS-zeo-browser-$version")
   cat "$out/SHA256SUMS-zeo-browser-$version"
 }
 
